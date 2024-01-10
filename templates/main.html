@@ -1,0 +1,375 @@
+{% extends 'parts/base.html' %}
+{% load static %}
+{% load math_filters %}
+{% load cache %}
+{% block content %}
+
+<div class="row mt-2">
+    <div class="col-3 p-0 m-0" style="max-height: 800px; overflow: scroll; ">
+        <h2>Продукция</h2>
+        <input class="m-1" type="text" id="filterInput" placeholder="Фильтр по артиклу" style="width: 160px">
+        {% cache 1600 sidebar %}
+        {% for lproduct in lms_products%}
+
+        <div class="card mb-1 product-card" style="" data-code="{{ lproduct.code }}">
+            <div class="row g-0 p-1">
+                <div class="col-4" style='width: 50%'>
+                    <img src="{{lproduct.image.url}}" class="img-fluid" alt="{{lproduct.info}}" style="">
+                </div>
+
+                <div class="col-6 text-center">
+                    <p class="card-text p-0 m-0"><small class="">{{ lproduct.code }}</small></p>
+                    <button class='btn btn-sm btn-outline-success py-0 px-2'
+                       onclick="addToCart('{{ lproduct.code }}', '{{ lproduct.info }}', '{{ lproduct.image.url }}', '{{ lproduct.price }}', '{{ lproduct.code }}', '{{lproduct.brand}}')">
+                       Добавить
+                    </button>
+                </div>
+
+            </div>
+          </div>
+
+        {% endfor %}
+        {% endcache %}
+    </div>
+
+
+    <div class="col-9">
+            <div class="container" >
+
+
+                <div class="row">
+                    <h1> FORR </h1>
+
+                    <div class="col">
+                        <form method="get" action="{% url 'home' %}">
+                            {% csrf_token %}
+                            <input type="text" name="code" placeholder="Артикул">
+                            <button class='btn btn-sm btn-outline-primary mb-1 px-3' type="submit">Добавить</button>
+                        </form>
+                    </div>
+
+                    <div class="col">
+                        <button class='btn btn-sm btn-outline-success'
+                                        onclick="printSection('pdfArea')">Распечатать</button>
+
+                        <form action="{% url 'clear_session' %}" method="post" style='float: right;'>
+                            {% csrf_token %}
+                            <button class='btn btn-sm btn-outline-danger px-3' type="submit">Удалить все</button>
+                        </form>
+                    </div>
+                    <hr>
+                </div>
+
+                <div class="row" style='max-width: 800px; margin: auto' id='pdfArea'>
+
+                    {% cache 16000 header_top %}
+                        <div class="col">
+                            <h2>Коммерческое Предложение</h2>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-8 company-info">
+                                <p>
+                                    “FORR” LLC <br>
+                                    137/1, Ahunbaeva str., Bishkek, Kyrgyz Republic <br>
+                                    Phone/ Whats App: + 996 701 331 331 <br>
+                                    e-mail: forr.partner@gmail.com
+                                </p>
+                            </div>
+                            <div class="col-4 company-logo text-center">
+                                <img src="{% static 'icons/forr.png' %}" alt="Company logo"
+                                                class='img-fluid'>
+                            </div>
+                        </div>
+
+                        <div class="row header-card">
+                            <div class="card m-1" style="width: 20rem;">
+                                <ul class="list-group list-group-flush">
+                                <li class="list-group-item" style='display:flex;'>Проект: <input type="text" class="form-input ms-1" style='width: 80%;'></li>
+                                <li class="list-group-item" style='display:flex;'>Заказчик: <input type="text" class="form-input ms-1" style='width: 70%;'></li>
+                                </ul>
+                            </div>
+
+                            <div class="card m-1" style="width: auto;">
+                                <ul class="list-group list-group-flush">
+                                <li class="list-group-item">Дата : <span class='date'>  </span> </li>
+                                <li class="list-group-item" style='display:flex;'>Исх: <input type="text" class="form-input ms-1  " style='width: 50%;'></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    {% endcache %}
+
+                    <div class="col" id="printArea">
+
+                        <table class="table table-bordered rounded">
+                            <thead>
+                                <tr class='text-center'>
+                                    <th scope="col">Фото</th>
+                                    <th scope="col">Наименование</th>
+                                    <th scope="col">Количество</th>
+                                    <th scope="col">Цена(сом)</th>
+                                    <th scope="col">Общ.цена</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if products %}
+                                    {% for product in products %}
+                                    <tr class="product-row" data-code="{{ product.code }}">
+                                        <td class='product_image p-1 text-center'>
+                                            <img src="{{ product.img_src}}" alt="{{ product.title }}" class="img-fluid">
+                                        </td>
+                                        <td>
+                                            {{ product.title|safe }}
+                                            <br>
+                                            <button class="btn-delete m-1" onclick="deleteProduct('{{ product.code }}')">
+                                                <i class="bi bi-x"></i>
+                                            </button>
+
+                                            {% if product.web %}
+                                            <a href = '{{product.web}}' target='_blank'><i class="bi bi-chevron-compact-right"></i></a>
+                                            {% endif %}
+                                        </td>
+                                        <td class='text-center'>
+
+                                            <input class='border-0 text-center' type="text" id="quantityChange_{{ product.code }}" value="{{product.quantity}}" min="1" style="width: 50px;">
+                                            <button class="quantity-update" onclick="updateQuantity('{{ product.code }}')">
+                                                <i class="bi bi-chevron-compact-right"></i>
+                                            </button>
+
+                                        </td>
+                                        <td class='text-end'>
+                                            <span class='product-price'>{{ product.price }}</span>
+                                        </td>
+                                        <td class='text-end'>
+                                            {{ product.price|multiply:product.quantity }}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% endif %}
+                                <tr>
+                                    <td colspan="4" class="text-center"><strong>ИТОГО (сом):</strong></td>
+                                    <td class='text-end'><strong>{{ total_sum }}</strong></td>
+                                </tr>
+
+                                <tr>
+                                    <td colspan="4" class="text-center"><strong>Скидка :</strong>
+                                        <input type="text" value="7" id="discountInput"
+                                        placeholder="%" min="0" max="100"
+                                        style='width: 26px; border: none;'> %
+                                    </td>
+                                    <td class='text-end'>
+                                        <strong id="discountedTotal">{{ total_sum }}</strong>
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                {% if request.user.is_authenticated %}
+                    <div class="">
+                        <a href="{% url 'download_excel' %}" class="btn btn-sm btn-outline-secondary py-0 px-3">Сохранить в Excel</a>
+                    </div>
+                {% endif %}
+
+
+
+            </div>
+    </div>
+</div>
+
+<script>
+    function printSection(divId) {
+        var printContents = document.getElementById(divId).innerHTML;
+        var originalContents = document.body.innerHTML;
+
+        // Open a new window
+        var printWindow = window.open('', '', 'height=600,width=800');
+
+        // Write the HTML to the new window, open the print dialog, and close the window
+        printWindow.document.write('<html><head><title>Print</title>');
+        printWindow.document.write('<link rel="stylesheet" href="/static/css/print.css" media="print">'); // Include Bootstrap CSS or other styles if needed
+        printWindow.document.write(`<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous" media="print">`);
+
+
+        printWindow.document.write('</head><body >');
+        printWindow.document.write(printContents);
+        printWindow.document.write('</body></html>');
+        printWindow.document.close(); // necessary for IE >= 10
+        printWindow.focus(); // necessary for IE >= 10
+        printWindow.print();
+        printWindow.close();
+        return true;
+    }
+
+    function updateQuantity(code) {
+        // Send an AJAX request to your Django view that handles quantity updates
+        var change = document.getElementById('quantityChange_' + code).value;
+
+        var value = change;
+        var valid = /^[1-9]\d*$/.test(value);  // Regex to check for positive digits
+
+        if (!valid) {
+            alert('Введите количество в цифрах.');
+            return
+        }
+
+        fetch(`/update-quantity?code=${code}&change=${change}`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',  // Required for Django to recognize AJAX request
+            },
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();  // or 'response.text()' if you are not returning a JSON response
+            }
+            throw new Error('Network response was not ok.');
+        })
+        .then(data => {
+            // Update the page as needed, e.g., refresh the page or update the quantity and total displayed
+            location.reload();  // Simplest way to update the page
+        })
+        .catch(error => {
+            console.error('There has been a problem with your fetch operation:', error);
+        });
+    }
+
+    function deleteProduct(code) {
+        if (!confirm('Are you sure you want to delete this product?')) {
+            return;
+        }
+
+        fetch(`/delete-product?code=${code}`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',  // Required for Django to recognize AJAX request
+            },
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+            throw new Error('Network response was not ok.');
+        })
+        .then(data => {
+            location.reload();  // Reload the page to reflect the changes
+        })
+        .catch(error => {
+            console.error('There has been a problem with your fetch operation:', error);
+        });
+    }
+
+    function saveAsPDF() {
+        const { jsPDF } = window.jspdf;
+        const element = document.getElementById('pdfArea');
+
+        html2canvas(element, { useCORS: true }).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF({
+                orientation: 'portrait',
+                unit: 'pt',
+                format: 'a4'
+            });
+
+            // This is the height and width of an A4 page
+            const pageHeight = pdf.internal.pageSize.height;
+            const pageWidth = pdf.internal.pageSize.width;
+
+            let imgHeight = canvas.height * pageWidth / canvas.width;
+            let heightLeft = imgHeight;
+
+            let position = 0;
+
+            pdf.addImage(imgData, 'PNG', 0, position, pageWidth, imgHeight);
+            heightLeft -= pageHeight;
+
+            // Add new pages and draw subsequent parts of the image
+            while (heightLeft >= 0) {
+                position = heightLeft - imgHeight;
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 0, position, pageWidth, imgHeight);
+                heightLeft -= pageHeight;
+            }
+            pdf.save('table.pdf');
+        });
+    }
+
+    function setCurrentDate() {
+        var today = new Date();
+        var day = String(today.getDate()).padStart(2, '0');
+        var month = String(today.getMonth() + 1).padStart(2, '0'); // January is 0
+        var year = today.getFullYear();
+
+        var currentDate = day + '-' + month + '-' + year;
+
+        document.querySelector('.date').textContent = currentDate;
+    }
+
+    // Call the function to set the date when the script loads
+    setCurrentDate();
+
+    document.getElementById('filterInput').addEventListener('keyup', function() {
+        var searchValue = this.value.toLowerCase();
+        var products = document.querySelectorAll('.product-card');
+
+        products.forEach(function(product) {
+            var productCode = product.getAttribute('data-code').toLowerCase();
+            if (productCode.indexOf(searchValue) > -1) {
+                product.style.display = '';
+            } else {
+                product.style.display = 'none';
+            }
+        });
+    });
+
+
+    function updateDiscountedTotal() {
+        var discountPercent = parseFloat(document.getElementById('discountInput').value);
+        var totalSum = {{ total_sum }};
+        if (!isNaN(discountPercent) && discountPercent >= 0 && discountPercent <= 100) {
+            var discountedTotal = Math.round((totalSum - (totalSum * (discountPercent / 100))) / 10) * 10;
+            document.getElementById('discountedTotal').innerText = discountedTotal.toFixed(1);
+        } else {
+            document.getElementById('discountedTotal').innerText = totalSum.toFixed(1);
+        }
+    }
+    updateDiscountedTotal();
+    document.getElementById('discountInput').addEventListener('input', updateDiscountedTotal);
+
+    function addToCart(code, title, imgSrc, price, orgArticul, brand) {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;  // Get CSRF token
+        fetch('/add-to-cart/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrfToken,
+            },
+            body: `code=${code}&title=${title}&img_src=${imgSrc}&price=${price}&org_articul=${orgArticul}&brand=${brand}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Reload the page
+                console.log(data)
+                window.location.reload();
+            } else {
+                // Handle error
+                alert('There was an error adding the product to the cart.');
+            }
+        })
+        .catch(error => {
+            // Handle network error
+            alert('Network error occurred.');
+        });
+    }
+
+
+    </script>
+
+
+
+{% endblock %}

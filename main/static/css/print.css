@@ -1,0 +1,30 @@
+
+.quantity-update {
+    border: none;
+    background: none;
+}
+
+.btn-delete {
+    border: none;
+    background: none;
+    padding: 0 4px;
+}
+
+
+.product_image img{
+    max-width: 160px;
+    max-height: 100px;
+}
+
+.header-card input {
+    border: none;
+    border-bottom: 1px solid rgb(190, 190, 190);
+}
+.company-logo img{
+    max-width: 200px;
+    max-height: 120px;
+  }
+
+.company-info p {
+    line-height: 1.1;
+}

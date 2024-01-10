@@ -1,0 +1,31 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+{% include 'parts/_head.html' %}
+
+<body id="body">
+{% include 'parts/_nav.html' %}
+
+<div class="container">
+{% if messages %}
+{% for message in messages %}
+    {% if message.tags == 'error' %}
+    <div class="alert alert-warning" role="alert">
+       {{ message }}
+    </div>
+        {% else %}
+    <div class="alert alert-success" role="alert">
+        {{ message }}
+    </div>
+        {% endif %}
+    {% endfor %}
+{%endif %}
+
+ {% block content %} {% endblock %}
+
+    <link rel="stylesheet" href="{% static 'js/main.js' %}">
+</div>
+</body>
+</html>
