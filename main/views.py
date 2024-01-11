@@ -34,7 +34,7 @@ def home(request):
                 try:
                     product = Product.objects.get(code__iexact=code.strip())
                     title = product.info + ' / ' + product.code
-                    img_src = f'http://localhost:8000/products/{product.image}'
+                    img_src = f'/products/{product.image}'
                     new_product = {'code': code, 'title': title, 'img_src': img_src,
                                 'price': product.price, 'quantity': 1, 'org_articul': product.code, 'brand': product.brand}
                     request.session['products'].append(new_product)
@@ -126,7 +126,7 @@ def delete_product(request):
 def add_to_cart(request):
     code = request.POST.get('code')
     title = request.POST.get('title')
-    img_src = f"http://localhost:8000{request.POST.get('img_src')}"
+    img_src = f"{request.POST.get('img_src')}"
     price = request.POST.get('price')
     org_articul = request.POST.get('org_articul')
     brand = request.POST.get('brand')
