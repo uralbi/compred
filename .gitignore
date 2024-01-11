@@ -4,4 +4,16 @@ __pycache__/*
 Forr.sock
 /__pycache__
 .DS_Store
+<<<<<<< HEAD
 
+=======
+*/.DS_Store
+*/*/.DS_Store
+.DS_Store/
+__pycache__/
+Forr/__pycache__/
+account/__pycache__/
+main/__pycache__/
+main/templatetags/__pycache__/
+*.cpython-39.pyc
+>>>>>>> 07500f8 (added)
