@@ -8,7 +8,7 @@
     <div class="col-3 p-0 m-0" style="max-height: 800px; overflow: scroll; ">
         <h2>Продукция</h2>
         <input class="m-1" type="text" id="filterInput" placeholder="Фильтр по артиклу" style="width: 160px">
-        {% cache 1600 sidebar %}
+        {% cache 60 sidebar %}
         {% for lproduct in lms_products%}
 
         <div class="card mb-1 product-card" style="" data-code="{{ lproduct.code }}">

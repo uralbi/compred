@@ -13,6 +13,7 @@ from openpyxl import Workbook
 from openpyxl.drawing.image import Image
 from django.http import HttpResponse
 import datetime
+import re
 
 
 def home(request):
@@ -56,8 +57,16 @@ def home(request):
                                         'price': price, 'quantity': 1, 'org_articul': org_articul, 'web': web, 'brand': brand}
                             request.session['products'].append(new_product)
                             request.session.modified = True
-                        except Exception as e:
-                            print(e)
+                        except:
+                            try:
+                                title, img_src, price, org_articul, web, brand = get_vamsvet(code)
+                                # vams_web = 'https://www.vamsvet.ru'
+                                new_product = {'code': code, 'title': title, 'img_src': f"{img_src}",
+                                            'price': price, 'quantity': 1, 'org_articul': org_articul, 'web': web, 'brand': brand}
+                                request.session['products'].append(new_product)
+                                request.session.modified = True
+                            except Exception as e:
+                                print(e)
 
     total_sum = 0
     for product in request.session.get('products', []):
@@ -245,7 +254,6 @@ def get_data(articul):
 
 
 def get_fenix(articul):
-    # art = 'https://favourite-light.com/catalog/?s=1002-TB-300'
     web_link = f'https://favourite-light.com/catalog/?s={articul}'
     source = requests.get(web_link).text
     soup = BeautifulSoup(source, 'lxml')
@@ -276,3 +284,39 @@ def get_fenix(articul):
     assert articul == org_articul
     brand = 'Favourite'
     return title.title(), img_src, s_price, org_articul, web2, brand
+
+
+def get_vamsvet(articul):
+    # art = 'https://www.vamsvet.ru/search/?q=FR6005CL-L48G'
+    web_link = f'https://www.vamsvet.ru/search/?q={articul}'
+    webbase = 'https://www.vamsvet.ru'
+    source = requests.get(web_link).text
+    soup = BeautifulSoup(source, 'lxml')
+
+    link2 = soup.find('div', class_='prod__img-wrap').find('a')['href']
+
+    img_src = f"{webbase}{soup.find('img', class_='prod__img')['src']}"
+    price = [i for i in soup.find('div', class_='prod__price-cur').text if i.isdigit()]
+    price = round(int(''.join(price))*1.15, 0)
+
+    web2 = f'{webbase}{link2}'
+    source2 = requests.get(web2).text
+    soup2 = BeautifulSoup(source2, 'lxml')
+    title = soup2.find('h1', class_="page-title").text.strip()
+    org_articul = soup2.find('div', class_='prod-tec__value').text.strip()
+
+    tec_divs = soup2.find_all('div', class_="prod-tec__car")
+    ftr = ''
+    selected_ftr = ('Коллекция', "Высота, мм", "Диаметр, мм", "Ширина, мм", "Вес,", "Мощность лампы,", "Цветовая", "Глубина, мм",
+                    'Длина, мм', "Тип цоколя")
+    for div in tec_divs:
+        ftr_name = ' '.join(div.find('div', class_='prod-tec__name').text.strip().split(' ')[:2])
+        ftr_val = div.find('div', class_='prod-tec__value').text.strip().split(' ')[0]
+        ftr_name = re.sub(r'\s+', ' ', ftr_name).strip()
+        ftr_val = re.sub(r'\s+', ' ', ftr_val).strip()
+        if ftr_name in selected_ftr:
+            ftr += ftr_name +': '+ ftr_val + ', '
+    brand = 'Vam Svet'
+    assert articul.lower() == org_articul.lower()
+    title = title.title() + " " + ftr
+    return title, img_src, price, org_articul, web2, brand
