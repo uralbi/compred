@@ -182,8 +182,14 @@ def download_excel(request):
         sheet[f'F{row_num}'] = int(product['price'])
         sheet[f'G{row_num}'] = int(product['price']) * int(product['quantity'])
         sheet[f'H{row_num}'] = product['brand']
+
+        web_base = product.get('img_src')[:5]
+        web_src = product.get('img_src')
+        if 'http' not in web_base:
+            host = request.get_host()
+            web_src = f"http://{host}{product.get('img_src')}"
         if product.get('img_src'):
-            image_response = requests.get(product['img_src'])
+            image_response = requests.get(web_src)
             if image_response.status_code == 200:
                 image = Image(BytesIO(image_response.content))
                 desired_width = 140  # Set your desired width
