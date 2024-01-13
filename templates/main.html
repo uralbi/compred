@@ -5,20 +5,20 @@
 {% block content %}
 {% load humanize %}
 
-<div class="row mt-2">
+<div class="row mt-2 pb-4">
     <div class="col-3 p-0 m-0" style="max-height: 800px; overflow: scroll; ">
         <h2>Продукция</h2>
         <input class="m-1" type="text" id="filterInput" placeholder="Фильтр по артиклу" style="width: 160px">
-        {% cache 60 sidebar %}
+        {% cache 600 sidebar %}
         {% for lproduct in lms_products%}
 
         <div class="card mb-1 product-card" style="" data-code="{{ lproduct.code }}">
             <div class="row g-0 p-1">
-                <div class="col-4" style='width: 50%'>
+                <div class="col-sm-4" style='width: 50%'>
                     <img src="{{lproduct.image.url}}" class="img-fluid" alt="{{lproduct.info}}" style="">
                 </div>
 
-                <div class="col-6 text-center">
+                <div class="col-sm-6 text-center">
                     <p class="card-text p-0 m-0"><small class="">{{ lproduct.code }}</small></p>
                     <button class='btn btn-sm btn-outline-success py-0 px-2'
                        onclick="addToCart('{{ lproduct.code }}', '{{ lproduct.info }}', '{{ lproduct.image.url }}', '{{ lproduct.price }}', '{{ lproduct.code }}', '{{lproduct.brand}}')">
@@ -33,37 +33,39 @@
         {% endcache %}
     </div>
 
-
     <div class="col-9">
             <div class="container" >
-
-
-                <div class="row">
-                    <h1> FORR </h1>
-
+                <div class="row insert-div">
+                    {% comment %} <h1> FORR </h1> {% endcomment %}
                     <div class="col">
                         <form method="get" action="{% url 'home' %}">
                             {% csrf_token %}
-                            <input type="text" name="code" placeholder="Артикул">
-                            <button class='btn btn-sm btn-outline-primary mb-1 px-3' type="submit">Добавить</button>
+                            <input class='mb-1' type="text" name="code" placeholder="Артикул">
+                            <button class='btn btn-sm btn-outline-primary mx-0 px-3' type="submit">Добавить</button>
                         </form>
-                    </div>
 
-                    <div class="col">
-                        <button class='btn btn-sm btn-outline-success'
-                                        onclick="printSection('pdfArea')">Распечатать</button>
-
-                        <form action="{% url 'clear_session' %}" method="post" style='float: right;'>
+                        <form class='' action="{% url 'clear_session' %}" method="post" style='float: right;'>
                             {% csrf_token %}
-                            <button class='btn btn-sm btn-outline-danger px-3' type="submit">Удалить все</button>
+                            <button class='btn mt-2 btn-sm btn-outline-danger' type="submit"> X </button>
                         </form>
+
+                        {% if request.user.is_authenticated %}
+                    <div class="excel-link" style="float: right;">
+                        <a href="{% url 'download_excel' %}" class="btn btn-sm btn-outline-secondary px-3">В Excel</a>
                     </div>
-                    <hr>
+                    {% endif %}
+
+                        <button class='btn btn-sm mt-2 btn-outline-success'
+                                        onclick="printSection('pdfArea')" style='float: right;'>
+                                        Распечатать</button>
+
+                    </div>
+
                 </div>
 
                 <div class="row" style='max-width: 800px; margin: auto' id='pdfArea'>
 
-                    {% cache 16000 header_top %}
+                    {% cache 10 header_top %}
                         <div class="col">
                             <h2>Коммерческое Предложение</h2>
                         </div>
@@ -84,26 +86,31 @@
                         </div>
 
                         <div class="row header-card">
-                            <div class="card m-1" style="width: 20rem;">
-                                <ul class="list-group list-group-flush">
-                                <li class="list-group-item" style='display:flex;'>Проект: <input type="text" class="form-input ms-1" style='width: 80%;'></li>
-                                <li class="list-group-item" style='display:flex;'>Заказчик: <input type="text" class="form-input ms-1" style='width: 70%;'></li>
-                                </ul>
+
+                            <div class="col-6 p-1">
+                                <div class="card" style="min-width: 220px;">
+                                    <ul class="list-group list-group-flush">
+                                    <li class="list-group-item" style='display:flex;'>Проект: <input type="text" class="form-input ms-1" style='width: 80%;'></li>
+                                    <li class="list-group-item" style='display:flex;'>Заказчик: <input type="text" class="form-input ms-1" style='width: 70%;'></li>
+                                    </ul>
+                                </div>
                             </div>
 
-                            <div class="card m-1" style="width: auto;">
-                                <ul class="list-group list-group-flush">
-                                <li class="list-group-item">Дата : <span class='date'>  </span> </li>
-                                <li class="list-group-item" style='display:flex;'>Исх: <input type="text" class="form-input ms-1  " style='width: 50%;'></li>
-                                </ul>
+                            <div class="col-6 p-1">
+                                <div class="card" style="min-width: 220px;">
+                                    <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">Дата : <span class='date'>  </span> </li>
+                                    <li class="list-group-item" style='display:flex;'>Исх: <input type="text" class="form-input ms-1  " style='width: 50%;'></li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
 
                     {% endcache %}
 
-                    <div class="col" id="printArea">
+                    <div class="col p-0" id="printArea">
 
-                        <table class="table table-bordered rounded">
+                        <table class="table mt-2 table-bordered rounded">
                             <thead>
                                 <tr class='text-center'>
                                     <th scope="col">Фото</th>
@@ -168,14 +175,6 @@
                         </table>
                     </div>
                 </div>
-
-                {% if request.user.is_authenticated %}
-                    <div class="">
-                        <a href="{% url 'download_excel' %}" class="btn btn-sm btn-outline-secondary py-0 px-3">Сохранить в Excel</a>
-                    </div>
-                {% endif %}
-
-
 
             </div>
     </div>
