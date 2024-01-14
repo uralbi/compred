@@ -18,3 +18,4 @@ account/__pycache__/
 main/__pycache__/
 main/templatetags/__pycache__/
 *.cpython-39.pyc
+*.cpython-310.pyc
