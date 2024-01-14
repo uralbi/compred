@@ -6,9 +6,9 @@
 {% load humanize %}
 
 <div class="row mt-2 pb-4">
-    <div class="col-3 p-0 m-0" style="max-height: 800px; overflow: scroll; ">
+    <div class="col-3 p-0 m-0" style="max-height: 1000px; overflow: scroll; ">
         <h2>Продукция</h2>
-        <input class="m-1" type="text" id="filterInput" placeholder="Фильтр по артиклу" style="width: 160px">
+        <input class="m-1" type="text" id="filterInput" placeholder="Фильтр по артиклу">
         {% cache 600 sidebar %}
         {% for lproduct in lms_products%}
 
@@ -33,9 +33,9 @@
         {% endcache %}
     </div>
 
-    <div class="col-9">
+    <div class="col-9 p-0">
             <div class="container" >
-                <div class="row insert-div">
+                <div class="row insert-div ms-1">
                     {% comment %} <h1> FORR </h1> {% endcomment %}
                     <div class="col">
                         <form method="get" action="{% url 'home' %}">
@@ -46,7 +46,7 @@
 
                         <form class='' action="{% url 'clear_session' %}" method="post" style='float: right;'>
                             {% csrf_token %}
-                            <button class='btn mt-2 btn-sm btn-outline-danger' type="submit"> X </button>
+                            <button class='btn mt-2 ms-2 btn-sm btn-outline-danger' type="submit"> X </button>
                         </form>
 
                         {% if request.user.is_authenticated %}
@@ -87,7 +87,7 @@
 
                         <div class="row header-card">
 
-                            <div class="col-6 p-1">
+                            <div class="col-sm-6 p-1">
                                 <div class="card" style="min-width: 220px;">
                                     <ul class="list-group list-group-flush">
                                     <li class="list-group-item" style='display:flex;'>Проект: <input type="text" class="form-input ms-1" style='width: 80%;'></li>
@@ -96,7 +96,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-6 p-1">
+                            <div class="col-sm-6 p-1">
                                 <div class="card" style="min-width: 220px;">
                                     <ul class="list-group list-group-flush">
                                     <li class="list-group-item">Дата : <span class='date'>  </span> </li>
