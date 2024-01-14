@@ -205,7 +205,7 @@
         var change = document.getElementById('quantityChange_' + code).value;
 
         var value = change;
-        var valid = /^[1-9]\d*$/.test(value);  // Regex to check for positive digits
+        var valid = /^[1-9]\d*(\.\d+)?$/.test(value);  // Regex to check for positive digits
 
         if (!valid) {
             alert('Введите количество в цифрах.');
@@ -321,17 +321,23 @@
         });
     });
 
+    function formatNumberWithSpaces(number) {
+        return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+    }
 
     function updateDiscountedTotal() {
         var discountPercent = parseFloat(document.getElementById('discountInput').value);
         var totalSum = {{ total_sum }};
         if (!isNaN(discountPercent) && discountPercent >= 0 && discountPercent <= 100) {
             var discountedTotal = Math.round((totalSum - (totalSum * (discountPercent / 100))) / 10) * 10;
-            document.getElementById('discountedTotal').innerText = discountedTotal.toFixed(1);
+            var formattedDiscountedTotal = formatNumberWithSpaces(discountedTotal);
+            document.getElementById('discountedTotal').innerText = formattedDiscountedTotal;
         } else {
-            document.getElementById('discountedTotal').innerText = totalSum.toFixed(1);
+            var formattedTotalSum = formatNumberWithSpaces(totalSum);
+            document.getElementById('discountedTotal').innerText = formattedTotalSum;
         }
     }
+
     updateDiscountedTotal();
     document.getElementById('discountInput').addEventListener('input', updateDiscountedTotal);
 

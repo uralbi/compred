@@ -1,8 +1,14 @@
+<<<<<<< HEAD
 
 Forr.sock
 /__pycache__
 db.sqlite3
 
+=======
+Forr.sock
+db.sqlite3
+.DS_Store
+>>>>>>> 3e2cdee (gitingore)
 */.DS_Store
 */*/.DS_Store
 .DS_Store/
