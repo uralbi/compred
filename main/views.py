@@ -95,7 +95,7 @@ def clear_session(request):
 def update_quantity(request):
     try:
         code = request.GET.get('code')
-        change = int(request.GET.get('change', 0))
+        change = float(request.GET.get('change', 0))
 
         if 'products' in request.session:
             # Find the product with the matching code
