@@ -25,7 +25,7 @@ def home(request):
 
     if 'code' in request.GET:
         code = request.GET['code'].strip()
-        codes = code.split(' ')
+        codes = code.split(';')
         for code in codes:
             if len(code) > 3:
                 existing_product = next((item for item in request.session['products'] if item['code'] == code), None)
