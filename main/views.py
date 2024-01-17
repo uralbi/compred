@@ -300,6 +300,7 @@ def get_vamsvet(articul):
     price = round(int(''.join(price))*1.15, 0)
 
     web2 = f'{webbase}{link2}'
+    print(web2)
     source2 = requests.get(web2).text
     soup2 = BeautifulSoup(source2, 'lxml')
     title = soup2.find('h1', class_="page-title").text.strip()
@@ -316,7 +317,7 @@ def get_vamsvet(articul):
         ftr_val = re.sub(r'\s+', ' ', ftr_val).strip()
         if ftr_name in selected_ftr:
             ftr += ftr_name +': '+ ftr_val + ', '
+        print(ftr)
     brand = 'Vam Svet'
-    assert articul.lower() == org_articul.lower()
     title = title.title() + " " + ftr
     return title, img_src, price, org_articul, web2, brand
