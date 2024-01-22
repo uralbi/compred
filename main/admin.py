@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Product, Brand
+from .models import Product, Brand, Promotions, Margin
 from django.utils.translation import gettext_lazy as _
 from django.utils.html import format_html
 
@@ -26,10 +26,24 @@ class ProductAdmin (admin.ModelAdmin):
 class BrandAdmin(admin.ModelAdmin):
     list_display = ('name', 'id')
 
+class PromotionAdmin(admin.ModelAdmin):
+    list_display = ('image_th', 'code', 'info', 'price', 'quantity')
+    list_editable = ('price', 'quantity')
+    def image_th(self, obj):
+        if obj.image:
+            return format_html('<img src="{}" width="60" height="60" />', obj.image.url)
+        return "-"
+    image_th.short_description = 'Image'
+
+class MarginAdmin(admin.ModelAdmin):
+    list_display = ('brand', 'margin')
+    list_editable = ('margin',)
+
 # Register your models here.
 admin.site.register(Product, ProductAdmin)
 admin.site.register(Brand, BrandAdmin)
-
+admin.site.register(Promotions, PromotionAdmin)
+admin.site.register(Margin, MarginAdmin)
 
 
 

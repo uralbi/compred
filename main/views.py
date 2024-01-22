@@ -6,7 +6,7 @@ from django.views.decorators.http import require_http_methods
 from django.contrib import messages
 from django.http import HttpResponse
 from django.utils.safestring import mark_safe
-from .models import Product
+from .models import Product, Promotions, Margin
 import requests
 from io import BytesIO
 from openpyxl import Workbook
@@ -15,6 +15,13 @@ from django.http import HttpResponse
 import datetime
 import re
 
+def homepage(request):
+    context = {
+        'products': []
+    }
+    products = Promotions.objects.filter(quantity__gt = 0)
+    context['products'] = products
+    return render(request, 'index.html', context)
 
 def home(request):
     context = {
@@ -26,13 +33,16 @@ def home(request):
     if 'code' in request.GET:
         code = request.GET['code'].strip()
         codes = code.split(';')
+        margin = Margin.objects.all()
+
         for code in codes:
             if len(code) > 3:
                 existing_product = next((item for item in request.session['products'] if item['code'] == code), None)
                 if existing_product:
-                    messages.success(request, 'Артикуль уже добавлен!')
+                    messages.success(request, 'Артикул уже добавлен!')
                     return redirect('home')
                 try:
+                    print('handling DB')
                     product = Product.objects.get(code__iexact=code.strip())
                     title = product.info + ' / ' + product.code
                     img_src = f'/products/{product.image}'
@@ -40,33 +50,40 @@ def home(request):
                                 'price': product.price, 'quantity': 1, 'org_articul': product.code, 'brand': product.brand.name}
                     request.session['products'].append(new_product)
                     request.session.modified = True
-                except:
-                    try:
-                        title, img_src, price, org_articul, web, brand = get_data(code)
-                        existing_product = next((item for item in request.session['products'] if item['code'] == code), None)
-                        new_product = {'code': code, 'title': title, 'img_src': img_src,
-                                        'price': price, 'quantity': 1, 'org_articul': org_articul, 'web': web, 'brand': brand}
-                        request.session['products'].append(new_product)
-                        request.session.modified = True
-
-                    except:
+                except Exception as e:
+                    print(e)
+                    if e:
                         try:
-                            title, img_src, price, org_articul, web, brand = get_fenix(code)
-                            fenix_web = 'https://favourite-light.com'
-                            new_product = {'code': code, 'title': title, 'img_src': f"{fenix_web}{img_src}",
-                                        'price': price, 'quantity': 1, 'org_articul': org_articul, 'web': web, 'brand': brand}
+                            print('handling maytoni')
+                            title, img_src, price, org_articul, web, brand = get_data(code)
+                            mrg = margin.get(brand__name=brand).margin
+                            existing_product = next((item for item in request.session['products'] if item['code'] == code), None)
+                            price = int(round(price*(1+mrg/100), -1))
+                            new_product = {'code': code, 'title': title, 'img_src': img_src,
+                                            'price': price, 'quantity': 1, 'org_articul': org_articul, 'web': web, 'brand': brand}
                             request.session['products'].append(new_product)
                             request.session.modified = True
-                        except:
+                        except Exception as e:
                             try:
-                                title, img_src, price, org_articul, web, brand = get_vamsvet(code)
-                                # vams_web = 'https://www.vamsvet.ru'
-                                new_product = {'code': code, 'title': title, 'img_src': f"{img_src}",
+                                title, img_src, price, org_articul, web, brand = get_fenix(code)
+                                mrg = margin.get(brand__name=brand).margin
+                                price = int(round(price*(1+mrg/100), -1))
+                                fenix_web = 'https://favourite-light.com'
+                                new_product = {'code': code, 'title': title, 'img_src': f"{fenix_web}{img_src}",
                                             'price': price, 'quantity': 1, 'org_articul': org_articul, 'web': web, 'brand': brand}
                                 request.session['products'].append(new_product)
                                 request.session.modified = True
                             except Exception as e:
-                                print(e)
+                                try:
+                                    title, img_src, price, org_articul, web, brand = get_vamsvet(code)
+                                    mrg = margin.get(brand__name=brand).margin
+                                    price = int(round(price*(1+mrg/100), -1))
+                                    new_product = {'code': code, 'title': title, 'img_src': f"{img_src}",
+                                                'price': price, 'quantity': 1, 'org_articul': org_articul, 'web': web, 'brand': brand}
+                                    request.session['products'].append(new_product)
+                                    request.session.modified = True
+                                except Exception as e:
+                                    print(e)
 
     total_sum = 0
     for product in request.session.get('products', []):
@@ -152,7 +169,7 @@ def add_to_cart(request):
     # Add product to session
     existing_product = next((item for item in request.session['products'] if item['code'] == code), None)
     if existing_product:
-        messages.success(request, 'Артикуль уже добавлен!')
+        messages.success(request, 'Артикул уже добавлен!')
         return JsonResponse({'status': 'success'})
     request.session['products'].append(new_product)
     request.session.modified = True
@@ -246,11 +263,10 @@ def get_data(articul):
     title = mark_safe(title)
     price = [i for i in soup.find('span', class_='price').text if i.isdigit()]
     d_price = int(''.join(price))
-    s_price = round(d_price*1.1, -1)
     img_src = soup.find('picture', class_='catalog-card__img-img active').find('img')['src']
     img_src = f'{baseweb}{img_src}'
     brand = 'Maytoni'
-    return title, img_src, s_price, org_articul, pf_link, brand
+    return title, img_src, d_price, org_articul, pf_link, brand
 
 
 def get_fenix(articul):
@@ -279,11 +295,10 @@ def get_fenix(articul):
     t1 = title[idx1:]
     title = t1 + title[:idx1]
     title = title.replace('высота', 'выс.').replace('длина', 'дл.').replace('ширина', 'шир.').replace('материал', '')
-    s_price = round(price * 1.25, -1)
     org_articul = articul2.upper()
     assert articul == org_articul
-    brand = 'Favourite'
-    return title.title(), img_src, s_price, org_articul, web2, brand
+    brand = 'Fenix'
+    return title.title(), img_src, price, org_articul, web2, brand
 
 
 def get_vamsvet(articul):
@@ -297,10 +312,9 @@ def get_vamsvet(articul):
 
     img_src = f"{webbase}{soup.find('img', class_='prod__img')['src']}"
     price = [i for i in soup.find('div', class_='prod__price-cur').text if i.isdigit()]
-    price = round(int(''.join(price))*1.15, 0)
+    price = int(''.join(price))
 
     web2 = f'{webbase}{link2}'
-    print(web2)
     source2 = requests.get(web2).text
     soup2 = BeautifulSoup(source2, 'lxml')
     title = soup2.find('h1', class_="page-title").text.strip()
@@ -317,7 +331,6 @@ def get_vamsvet(articul):
         ftr_val = re.sub(r'\s+', ' ', ftr_val).strip()
         if ftr_name in selected_ftr:
             ftr += ftr_name +': '+ ftr_val + ', '
-        print(ftr)
-    brand = 'Vam Svet'
+    brand = 'Vamsvet'
     title = title.title() + " " + ftr
     return title, img_src, price, org_articul, web2, brand
