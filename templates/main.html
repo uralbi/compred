@@ -17,13 +17,14 @@
                         <div class="card mb-1 product-card" style="" data-code="{{ lproduct.code }}">
                             <div class="row g-0 p-1">
                                 <div class="col-sm-4 g-0 m-0" style='width: 50%'>
-                                    <img src="{{lproduct.image.url}}" class="img-fluid" alt="{{lproduct.info}}">
+                                    <img src="{{lproduct.image.url}}" class="img-fluid" alt="{{lproduct.code}}">
                                     <span class='price-badge'>{{ lproduct.price}}</span>
                                 </div>
                                 <div class="col-sm-6 text-center p-0">
                                     <p class="card-text p-0 m-0"><small class="">{{ lproduct.code }}</small></p>
+                                    {{lproduct.info}}
                                     <button class='btn btn-sm btn-outline-success py-0 px-2' style="font-size: 0.7em;"
-                                    onclick="addToCart('{{ lproduct.code }}', '{{ lproduct.info }}', '{{ lproduct.image.url }}', '{{ lproduct.price }}', '{{ lproduct.code }}', '{{lproduct.brand}}')">
+                                    onclick="addToCart('{{ lproduct.code }}', '{{ lproduct.info|str_strip }}', '{{ lproduct.image.url }}', '{{ lproduct.price }}', '{{ lproduct.code }}', '{{lproduct.brand}}')">
                                     Добавить
                                     </button>
                                 </div>

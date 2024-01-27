@@ -10,3 +10,8 @@ def multiply(value, arg):
 @register.filter(name='discount')
 def multiply(value, arg):
     return round(value * (100-arg)/100,-1)
+
+@register.filter(name='str_strip')
+def urlencode(value):
+    val = value.replace('\r\n', ' ')
+    return  val
