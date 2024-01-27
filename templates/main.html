@@ -7,32 +7,31 @@
 {% block content %}
 
 
-<div class="row mt-2 pb-4">
-    <div class="col-3 p-0 m-0" style="max-height: 1000px; overflow: scroll; ">
-        <h2>Продукция</h2>
-        <input class="m-1" type="text" id="filterInput" placeholder="Фильтр по артиклу">
-        {% cache 1600 sidebar %}
-        {% for lproduct in lms_products%}
-
-        <div class="card mb-1 product-card" style="" data-code="{{ lproduct.code }}">
-            <div class="row g-0 p-1">
-                <div class="col-sm-4" style='width: 50%'>
-                    <img src="{{lproduct.image.url}}" class="img-fluid" alt="{{lproduct.info}}" style="">
-                </div>
-
-                <div class="col-sm-6 text-center">
-                    <p class="card-text p-0 m-0"><small class="">{{ lproduct.code }}</small></p>
-                    <button class='btn btn-sm btn-outline-success py-0 px-2'
-                       onclick="addToCart('{{ lproduct.code }}', '{{ lproduct.info }}', '{{ lproduct.image.url }}', '{{ lproduct.price }}', '{{ lproduct.code }}', '{{lproduct.brand}}')">
-                       Добавить
-                    </button>
-                </div>
-
-            </div>
-          </div>
-
-        {% endfor %}
-        {% endcache %}
+    <div class="row mt-2 pb-4">
+        <div class="col-3 p-0 m-0" >
+            <h2>Продукция</h2>
+            <input class="m-1" type="text" id="filterInput" placeholder="Фильтр по артиклу">
+            <div style="max-height: 90vh; width: 100%; overflow-y: scroll; overflow-x: hidden">
+                {% comment %} {% cache 0 sidebar %} {% endcomment %}
+                    {% for lproduct in lms_products%}
+                        <div class="card mb-1 product-card" style="" data-code="{{ lproduct.code }}">
+                            <div class="row g-0 p-1">
+                                <div class="col-sm-4 g-0 m-0" style='width: 50%'>
+                                    <img src="{{lproduct.image.url}}" class="img-fluid" alt="{{lproduct.info}}">
+                                    <span class='price-badge'>{{ lproduct.price}}</span>
+                                </div>
+                                <div class="col-sm-6 text-center p-0">
+                                    <p class="card-text p-0 m-0"><small class="">{{ lproduct.code }}</small></p>
+                                    <button class='btn btn-sm btn-outline-success py-0 px-2' style="font-size: 0.7em;"
+                                    onclick="addToCart('{{ lproduct.code }}', '{{ lproduct.info }}', '{{ lproduct.image.url }}', '{{ lproduct.price }}', '{{ lproduct.code }}', '{{lproduct.brand}}')">
+                                    Добавить
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% comment %} {% endcache %} {% endcomment %}
+        </div>
     </div>
 
     <div class="col-9 p-0">
@@ -92,8 +91,8 @@
                             <div class="col-sm-6 p-1">
                                 <div class="card" style="min-width: 220px;">
                                     <ul class="list-group list-group-flush">
-                                    <li class="list-group-item" style='display:flex;'>Проект: <input type="text" class="form-input ms-1" style='width: 80%;'></li>
-                                    <li class="list-group-item" style='display:flex;'>Заказчик: <input type="text" class="form-input ms-1" style='width: 70%;'></li>
+                                        <li class="list-group-item" style='display:flex;'>Проект: <input type="text" id="projectInput" class="form-input ms-1" style='width: 80%;'></li>
+                                        <li class="list-group-item" style='display:flex;'>Заказчик: <input type="text" id="customerInput" class="form-input ms-1" style='width: 70%;'></li>
                                     </ul>
                                 </div>
                             </div>
@@ -164,8 +163,7 @@
 
                                 <tr>
                                     <td colspan="4" class="text-center"><strong>Со скидкой :</strong>
-                                        <input type="text" value="7" id="discountInput"
-                                        placeholder="%" min="0" max="100"
+                                        <input type="text" value="7" id="discountInput" placeholder="%" min="0" max="100"
                                         style='width: 26px; border: none;'>%
                                     </td>
                                     <td class='text-end'>
@@ -176,14 +174,11 @@
                                 <tr>
                                     <td colspan="4" class="text">
                                         Срок поставки
-                                        <input type="text" value="7-10"
-                                        placeholder="" min="0" max="100"
+                                        <input type="text" value="7-10" placeholder="" min="0" max="100"
                                         style='width: 46px; border: none;'> рабочих дней
                                         <br>
-                                        <input type="text" value="Гарантия 2 года"
-                                        placeholder="" style='width: 100%; border: none;'>
-                                        <input type="text" value="При возврате удерживается 20%"
-                                        placeholder="" style='width: 100%; border: none;'>
+                                        <input type="text" value="Гарантия 2 года" style='width: 100%; border: none;'>
+                                        <p contenteditable="true">При возврате удерживается 20%</p>
                                     </td>
                                     <td class='text-end'>
 
@@ -327,19 +322,38 @@
     // Call the function to set the date when the script loads
     setCurrentDate();
 
-    document.getElementById('filterInput').addEventListener('keyup', function() {
-        var searchValue = this.value.toLowerCase();
-        var products = document.querySelectorAll('.product-card');
+// Function to filter products based on search query
+function filterProducts() {
+    var searchValue = document.getElementById('filterInput').value.toLowerCase();
+    var products = document.querySelectorAll('.product-card');
 
-        products.forEach(function(product) {
-            var productCode = product.getAttribute('data-code').toLowerCase();
-            if (productCode.indexOf(searchValue) > -1) {
-                product.style.display = '';
-            } else {
-                product.style.display = 'none';
-            }
-        });
+    products.forEach(function(product) {
+        var productCode = product.getAttribute('data-code').toLowerCase();
+        if (productCode.indexOf(searchValue) > -1) {
+            product.style.display = '';
+        } else {
+            product.style.display = 'none';
+        }
     });
+
+    // Store the search query in local storage
+    localStorage.setItem('searchQuery', searchValue);
+}
+
+// Function to load the search query from local storage
+function loadSearchQuery() {
+    var searchQuery = localStorage.getItem('searchQuery');
+    if (searchQuery) {
+        document.getElementById('filterInput').value = searchQuery;
+        filterProducts();
+    }
+}
+
+// Event listener for keyup event
+document.getElementById('filterInput').addEventListener('keyup', filterProducts);
+
+// Load search query when the page loads
+window.addEventListener('load', loadSearchQuery);
 
     function formatNumberWithSpaces(number) {
         return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
@@ -387,6 +401,54 @@
             alert('Network error occurred.');
         });
     }
+
+    // Function to save input data to local storage
+function saveInputData() {
+    var projectInput = document.getElementById('projectInput').value;
+    var customerInput = document.getElementById('customerInput').value;
+
+    localStorage.setItem('projectInput', projectInput);
+    localStorage.setItem('customerInput', customerInput);
+}
+
+// Function to load input data from local storage
+function loadInputData() {
+    var projectInput = localStorage.getItem('projectInput');
+    var customerInput = localStorage.getItem('customerInput');
+
+    if (projectInput) {
+        document.getElementById('projectInput').value = projectInput;
+    }
+    if (customerInput) {
+        document.getElementById('customerInput').value = customerInput;
+    }
+}
+
+// Load input data when the page loads
+window.addEventListener('load', loadInputData);
+
+// Save input data when the inputs lose focus
+document.getElementById('projectInput').addEventListener('blur', saveInputData);
+document.getElementById('customerInput').addEventListener('blur', saveInputData);
+
+// Function to save discount input data to local storage
+function saveDiscountInputData() {
+    var discountInput = document.getElementById('discountInput').value;
+    localStorage.setItem('discountInput', discountInput);
+}
+
+// Function to load discount input data from local storage
+function loadDiscountInputData() {
+    var discountInput = localStorage.getItem('discountInput');
+    if (discountInput !== null) {
+        document.getElementById('discountInput').value = discountInput;
+        updateDiscountedTotal();
+    }
+}
+
+window.addEventListener('load', loadDiscountInputData);
+document.getElementById('discountInput').addEventListener('input', saveDiscountInputData);
+
     </script>
 
 {% endblock %}

@@ -21,14 +21,11 @@ class Brand(models.Model):
 
 
 class Promotions(models.Model):
-    image = models.ImageField(upload_to='promotions/', verbose_name='Фото')
-    code = models.CharField(max_length=100, verbose_name='Артикул')
-    info = models.TextField(verbose_name='Описание')
-    price = models.IntegerField()
-    quantity = models.IntegerField()
+    product = models.OneToOneField(Product, on_delete=models.CASCADE, verbose_name="Пром-товар", null=True, blank=True)
+    quantity = models.IntegerField(default=1)
 
     def __str__(self):
-        return self.code
+        return f'{self.product}'
 
 
 class Margin(models.Model):

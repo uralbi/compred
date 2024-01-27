@@ -1,3 +1,27 @@
+.product-price-card {
+    width: 48%;
+    height: 100px;
+    float: left;
+    margin: 6px;
+}
+
+.price-badge {
+    position: absolute;
+    bottom: 2px; /* Adjust top position as needed */
+    right: 2px; /* Adjust left position as needed */
+    padding: 0px 6px;
+    border-radius: 4px;
+    border: none;
+    color: white;
+    background: rgba(108, 108, 108, 0.6);
+    font-style: italic;
+    font-size: 0.8em;
+}
+.product-list {
+    max-height: 100vh;
+    overflow-y: scroll;
+}
+
 .quantity-update {
     border: none;
     background: none;
@@ -62,6 +86,15 @@
 footer {
     background: #49141c;
     color:#ad9397;
+}
+
+@media (max-width: 767px) {
+    .product-price-card {
+        width: 98%;}
+    .card-title, .card-text{
+        font-size: 90%;
+        margin-bottom: 2px;
+    }
 }
 
 @media (max-width: 500px) {

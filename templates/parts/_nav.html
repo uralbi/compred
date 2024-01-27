@@ -10,27 +10,27 @@
         <li class="nav-item">
           <a class="nav-link active" aria-current="page" href="{% url 'home' %}"> Главная </a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Features</a>
-        </li>
+
+        {% if request.user.is_authenticated %}
         <li class="nav-item">
           <a class="nav-link" href="#">Цены</a>
         </li>
+        {% endif %}
+
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
              Профиль
           </a>
           <ul class="dropdown-menu">
             {% if request.user.is_authenticated %}
-            <li><a class="dropdown-item" href=""> Dashboard </a></li>
-            <li><a class="dropdown-item" href=""> Reset Password </a></li>
-            <li><a class="dropdown-item" href=""> Выйти </a></li>
+            <li><a class="dropdown-item" href="/admin"> Админ </a></li>
+            <li><a class="dropdown-item" href="{% url 'logout' %}"> Выйти </a></li>
             {% else %}
-            <li><a  class="dropdown-item" href=""> Войти </a> </li>
-            <li><a class="dropdown-item" href=""> Зарегистрироваться </a></li>
+            <li><a  class="dropdown-item" href="/admin"> Войти </a> </li>
             {% endif %}
           </ul>
         </li>
+
       </ul>
     </div>
   </div>

@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.contrib.auth import logout
 from django.http import JsonResponse
 from django.views.generic import ListView
 from bs4 import BeautifulSoup
@@ -15,11 +16,20 @@ from django.http import HttpResponse
 import datetime
 import re
 
+
+def showroom(request):
+    ctx = {
+        'products': []
+    }
+    ctx['products'] = Promotions.objects.all()
+    return render(request, 'products.html', ctx)
+
 def homepage(request):
     context = {
         'products': []
     }
-    products = Promotions.objects.filter(quantity__gt = 0)
+    proms = Promotions.objects.all()
+    products = [prom.product for prom in proms if prom.product]
     context['products'] = products
     return render(request, 'index.html', context)
 
@@ -47,7 +57,7 @@ def home(request):
                     title = product.info + ' / ' + product.code
                     img_src = f'/products/{product.image}'
                     new_product = {'code': code, 'title': title, 'img_src': img_src,
-                                'price': product.price, 'quantity': 1, 'org_articul': product.code, 'brand': product.brand.name}
+                                'price': product.price, 'quantity': 1, 'org_articul': product.code, 'brand': product.brand}
                     request.session['products'].append(new_product)
                     request.session.modified = True
                 except Exception as e:
@@ -334,3 +344,8 @@ def get_vamsvet(articul):
     brand = 'Vamsvet'
     title = title.title() + " " + ftr
     return title, img_src, price, org_articul, web2, brand
+
+def logout_view(request):
+    logout(request)
+    # Redirect to a specific page after logout (e.g., home page)
+    return redirect('home')

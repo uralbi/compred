@@ -1,0 +1,109 @@
+{% extends 'parts/base.html' %}
+{% load static %}
+{% load math_filters %}
+{% load cache %}
+{% load humanize %}
+
+{% block content %}
+    <div class='container'>
+
+        <input type="text" id="filterInput" placeholder="Search for products...">
+        <div class="product-list">
+        <h4 class="fst-italic"></h4>
+            <ul class="list-unstyled">
+                <form method="post" >
+                    {% csrf_token %}
+                </form>
+
+                {% for prod in products %}
+                <li class="product-item" data-name="{{ prod.product }}">
+                    <div class="card product-price-card">
+                        <div class="row g-0">
+                          <div class="col-4">
+                            <img class="img-fluid rounded-start" src="{{prod.product.image.url}}" alt="Product Image">
+                            <small class="price-badge"> {{ prod.product.price}} сом </small>
+                          </div>
+                          <div class="col-8">
+                            <div class="card-body m-0 p-0">
+                              <h5 class="card-title">{{prod.product}}  </h5>
+                              <p class="card-text">{{prod.product.info}}</p>
+                              <button class='btn btn-sm btn-outline-success mb-1 py-0 px-2'
+                            onclick="addToCart('{{ prod.product.code }}', '{{ prod.product.info }}', '{{ prod.product.image.url }}', '{{ prod.product.price }}', '{{ prod.product.code }}', '{{prod.product.brand}}')">
+                            Добавить
+                            </button>
+                            <span class="{{prod.product.code}} badge bg-info m-0"></span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                </li>
+                {% endfor%}
+            </ul>
+        </div>
+    </div>
+
+<script>
+    function addToCart(code, title, imgSrc, price, orgArticul, brand) {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;  // Get CSRF token
+        const productCodeSpan = document.querySelector(`.${code}`);
+        fetch('/add-to-cart/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrfToken,
+            },
+            body: `code=${code}&title=${title}&img_src=${imgSrc}&price=${price}&org_articul=${orgArticul}&brand=${brand}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                productCodeSpan.textContent = 'добавлен';
+                {% comment %} window.location.reload(); {% endcomment %}
+            }
+            else {
+                console.log(data, 'error')
+                alert('There was an error adding the product to the cart.');
+            }
+        })
+        .catch(error => {
+            console.log('network error')
+        });
+    }
+
+    // Function to filter products based on search query
+function filterProducts() {
+    var filterValue = document.getElementById('filterInput').value.toLowerCase();
+    var productItems = document.getElementsByClassName('product-item');
+
+    for (var i = 0; i < productItems.length; i++) {
+        var productName = productItems[i].getAttribute('data-name').toLowerCase();
+        if (productName.indexOf(filterValue) > -1) {
+            productItems[i].style.display = '';
+        } else {
+            productItems[i].style.display = 'none';
+        }
+    }
+}
+
+// Function to load filter criteria from local storage
+function loadFilterCriteria() {
+    var filterInput = localStorage.getItem('filterInput');
+    if (filterInput) {
+        document.getElementById('filterInput').value = filterInput;
+        filterProducts();
+    }
+}
+
+// Event listener for input field
+document.getElementById('filterInput').addEventListener('input', function() {
+    localStorage.setItem('filterInput', this.value);
+    filterProducts();
+});
+
+// Load filter criteria when the page loads
+window.addEventListener('load', loadFilterCriteria);
+
+
+
+</script>
+{% endblock %}
