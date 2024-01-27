@@ -252,24 +252,5 @@
 
   <!-- Template Main JS File -->
   <script src="{% static 'js/main.js' %}"></script>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-       var myCarousel = new bootstrap.Carousel(document.getElementById('myCarousel'));
-
-       myCarousel._element.addEventListener('slid.bs.carousel', function() {
-          var activeItem = myCarousel._element.querySelector('.carousel-item.active .item_price');
-          if (activeItem) {
-             AOS.init({  // Initialize AOS (Animate on Scroll) library for the active item
-                startEvent: 'slid.bs.carousel',
-                offset: 100,
-             });
-          }
-       });
-    });
- </script>
-
-
 </body>
-
 </html>
