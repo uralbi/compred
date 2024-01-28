@@ -16,7 +16,7 @@ from django.http import HttpResponse
 import datetime
 import re
 
-
+# test view
 def showroom(request):
     ctx = {
         'products': []
