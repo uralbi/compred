@@ -249,10 +249,6 @@
     }
 
     function deleteProduct(code) {
-        if (!confirm('Are you sure you want to delete this product?')) {
-            return;
-        }
-
         fetch(`/delete-product?code=${code}`, {
             method: 'GET',
             headers: {
