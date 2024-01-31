@@ -5,6 +5,7 @@ urlpatterns = [
     path('', home, name='home'),
     path('logout/', logout_view, name='logout'),
     path('products/', showroom, name='showroom'),
+    path('mtps/', may_products, name='mtps'),
     # path('main/', homepage, name='homepage'),
     path('clear-session/', clear_session, name='clear_session'),
     path('update-quantity', update_quantity, name='update_quantity'),

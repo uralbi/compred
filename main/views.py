@@ -1,11 +1,11 @@
 from django.shortcuts import render, redirect
+from django.core.cache import cache
 from django.contrib.auth import logout
 from django.http import JsonResponse
 from django.views.generic import ListView
 from bs4 import BeautifulSoup
 from django.views.decorators.http import require_http_methods
 from django.contrib import messages
-from django.http import HttpResponse
 from django.utils.safestring import mark_safe
 from .models import Product, Promotions, Margin
 import requests
@@ -16,7 +16,55 @@ from django.http import HttpResponse
 import datetime
 import re
 
-# test view
+
+def may_products(request):
+    cache_time = 86400 # 86400 (one day)
+    ctx = {
+        'mtps': [],
+        'track': [],
+        'spots': [],
+    }
+    if 'mtps' not in request.session:
+        request.session['mtps'] = []
+    if 'track' not in request.session:
+        request.session['track'] = []
+    if 'spots' not in request.session:
+        request.session['spots'] = []
+
+    cached_data = cache.get('maytoni_led')
+    cached_tracks = cache.get('maytoni_track')
+    cached_spots = cache.get('maytoni_spots')
+    if cached_data is not None:
+        parsed_data = cached_data
+    else:
+        parsed_data = get_may_products(request)
+        cache.set('maytoni_led', parsed_data, timeout=cache_time)
+    for new_product in parsed_data:
+        request.session['mtps'].append(new_product)
+
+    if cached_tracks is not None:
+        parsed_tracks = cached_tracks
+    else:
+        parsed_tracks = get_may_tracks(request)
+        cache.set('maytoni_track', parsed_tracks, timeout=cache_time)
+    for new_track in parsed_tracks:
+        request.session['track'].append(new_track)
+
+    if cached_spots is not None:
+        parsed_spots = cached_spots
+    else:
+        parsed_spots = get_may_spots(request)
+        cache.set('maytoni_spots', parsed_spots, timeout=cache_time)
+    for new_spot in parsed_spots:
+        request.session['spots'].append(new_spot)
+
+    request.session.modified = True
+
+    ctx['mtps'] = request.session['mtps']
+    ctx['track'] = request.session['track']
+    ctx['spots'] = request.session['spots']
+    return render(request, 'mtps.html', ctx)
+
 def showroom(request):
     ctx = {
         'products': []
@@ -52,7 +100,6 @@ def home(request):
                     messages.success(request, 'Артикул уже добавлен!')
                     return redirect('home')
                 try:
-                    print('handling DB')
                     product = Product.objects.get(code__iexact=code.strip())
                     title = product.info + ' / ' + product.code
                     img_src = f'/products/{product.image}'
@@ -64,7 +111,6 @@ def home(request):
                     print(e)
                     if e:
                         try:
-                            print('handling maytoni')
                             title, img_src, price, org_articul, web, brand = get_data(code)
                             mrg = margin.get(brand__name=brand).margin
                             existing_product = next((item for item in request.session['products'] if item['code'] == code), None)
@@ -188,6 +234,9 @@ def add_to_cart(request):
 
 def download_excel(request):
     products = request.session.get('products', [])
+    num_of_pds= len(products)
+    if num_of_pds == 0:
+        return HttpResponse("No data", status=204)
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     t_date = datetime.date.today().strftime("%d-%m")
     f_name = f'products_{t_date}.xlsx'
@@ -347,5 +396,68 @@ def get_vamsvet(articul):
 
 def logout_view(request):
     logout(request)
-    # Redirect to a specific page after logout (e.g., home page)
     return redirect('home')
+
+
+def get_may_products(request):
+    baseweb = 'https://maytoni.ru'
+    parsed_data=[]
+    products = div_parser('https://maytoni.ru/search/?q=светодиодная лента', 'catalog__item')
+    mrg = Margin.objects.get(brand__name='Maytoni').margin
+    for product in products:
+        image_src = product.find("picture", class_="catalog-card__img-img active").find('img')['src']
+        articul = product.find("div", class_="catalog-card__article").text.strip().split(":")[1].strip()
+        title = product.find("div", class_="catalog-card__title").text.strip()
+        try:
+            price = product.find("span", class_="price").text.strip()
+            price = int(''.join([i for i in price if i.isdigit()]))
+            price = int(round(price*(1+mrg/100), -1))
+        except:
+            continue
+        new_product = {'image': f'{baseweb}{image_src}', 'articul': articul, 'title': title, 'price': price,}
+        parsed_data.append(new_product)
+    return parsed_data
+
+def get_may_tracks(request):
+    baseweb = 'https://maytoni.ru'
+    parsed_data=[]
+    products = div_parser('https://maytoni.ru/search/?q=шинопровод', 'catalog__item')
+    mrg = Margin.objects.get(brand__name='Maytoni').margin
+    for product in products:
+        image_src = product.find("picture", class_="catalog-card__img-img active").find('img')['src']
+        articul = product.find("div", class_="catalog-card__article").text.strip().split(":")[1].strip()
+        title = product.find("div", class_="catalog-card__title").text.strip()
+        try:
+            price = product.find("span", class_="price").text.strip()
+            price = int(''.join([i for i in price if i.isdigit()]))
+            price = int(round(price*(1+mrg/100), -1))
+        except:
+            continue
+        new_product = {'image': f'{baseweb}{image_src}', 'articul': articul, 'title': title, 'price': price,}
+        parsed_data.append(new_product)
+    return parsed_data
+
+def get_may_spots(request):
+    baseweb = 'https://maytoni.ru'
+    parsed_data=[]
+    products = div_parser('https://maytoni.ru/search/?q=трековый светильник', 'catalog__item')
+    mrg = Margin.objects.get(brand__name='Maytoni').margin
+    for product in products:
+        image_src = product.find("picture", class_="catalog-card__img-img active").find('img')['src']
+        articul = product.find("div", class_="catalog-card").find('a')['href'].split('/')[-2]
+        title = product.find("div", class_="catalog-card__title").text.strip()
+        try:
+            price = product.find("span", class_="price").text.strip()
+            price = int(''.join([i for i in price if i.isdigit()]))
+            price = int(round(price*(1+mrg/100), -1))
+        except:
+            continue
+        new_product = {'image': f'{baseweb}{image_src}', 'articul': articul, 'title': title, 'price': price}
+        parsed_data.append(new_product)
+    return parsed_data
+
+def div_parser(webl, class_name):
+    source = requests.get(webl).text
+    soup = BeautifulSoup(source, 'lxml')
+    products = soup.find_all("div", class_=class_name)
+    return products

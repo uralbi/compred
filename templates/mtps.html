@@ -1,0 +1,101 @@
+{% extends 'parts/base.html' %}
+{% load static %}
+{% load math_filters %}
+{% load extras %}
+{% load cache %}
+{% load humanize %}
+
+{% block content %}
+    <div class='row' style='width: auto;'>
+        <h4 class="fst-italic">Майтони</h4>
+        <input type="text" id="filterInput" placeholder="Фильтр по названию">
+
+        <div class="col-4">
+            <ul class="list-unstyled">
+                <form method="post" >
+                    {% csrf_token %}
+                </form>
+            {% for prod in track %}
+                {% render_product prod %}
+            {% endfor %}
+        </div>
+
+        <div class="col-4">
+            <ul class="list-unstyled">
+            {% for prod in spots %}
+
+                {% render_product prod %}
+
+            {% endfor %}
+        </div>
+
+        <div class="col-4">
+            <ul class="list-unstyled">
+            {% for prod in mtps %}
+                {% render_product prod %}
+            {% endfor %}
+        </div>
+
+        </ul>
+      </div>
+      <script>
+
+        function addToCart(code, title, imgSrc, price, orgArticul, brand) {
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;  // Get CSRF token
+            const productCodeSpan = document.querySelector(`.${code}`);
+            fetch('/add-to-cart/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': csrfToken,
+                },
+                body: `code=${code}&title=${title}&img_src=${imgSrc}&price=${price}&org_articul=${orgArticul}&brand=${brand}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    productCodeSpan.textContent = 'добавлен';
+                }
+                else {
+                    console.log(data, 'error')
+                    alert('There was an error adding the product to the cart.');
+                }
+            })
+            .catch(error => {
+                console.log('network error')
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const filterInput = document.getElementById('filterInput');
+            filterInput.addEventListener('input', function () {
+                const filterValue = filterInput.value.toLowerCase();
+                const words = filterValue.split(/\s+/).filter(Boolean); // Split filter value into words
+                const products = document.querySelectorAll('.product');
+                products.forEach(function (product) {
+                    const title = product.dataset.title;
+                    const containsAllWords = words.every(function (word) {
+                        return title.includes(word);
+                    });
+                    // Show or hide the product based on whether it contains all the words
+                    if (containsAllWords) {
+                        product.style.display = 'block';
+                    } else {
+                        product.style.display = 'none';
+                    }
+                });
+            });
+
+            const savedFilterValue = sessionStorage.getItem('filterValue');
+            if (savedFilterValue) {
+                filterInput.value = savedFilterValue;
+                filterInput.dispatchEvent(new Event('input'));
+            }
+
+            filterInput.addEventListener('input', function () {
+                sessionStorage.setItem('filterValue', filterInput.value);
+            });
+        });
+    </script>
+
+{% endblock %}
