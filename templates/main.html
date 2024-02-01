@@ -50,11 +50,9 @@
                             <button class='btn mt-2 ms-2 btn-sm btn-outline-danger' type="submit"> X </button>
                         </form>
 
-                        {% if request.user.is_authenticated %}
-                    <div class="excel-link" style="float: right;">
-                        <a href="{% url 'download_excel' %}" class="btn btn-sm btn-outline-secondary px-3">В Excel</a>
-                    </div>
-                    {% endif %}
+                        <div class="excel-link" style="float: right;">
+                            <a href="{% url 'download_excel' %}" class="btn btn-sm btn-outline-secondary px-3">В Excel</a>
+                        </div>
 
                         <button class='btn btn-sm mt-2 btn-outline-success'
                                         onclick="printSection('pdfArea')" style='float: right;'>
