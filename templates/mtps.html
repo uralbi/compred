@@ -6,11 +6,12 @@
 {% load humanize %}
 
 {% block content %}
-    <div class='row' style='width: auto;'>
+    <div class='' style='width: auto;'>
         <h4 class="fst-italic">Майтони</h4>
         <input type="text" id="filterInput" placeholder="Фильтр по названию">
+        <div class="row" style='height: calc(100vh - 54px - 126px); overflow-y: scroll;'>
 
-        <div class="col-4">
+        <div class="col-sm-6 col-md-4">
             <ul class="list-unstyled">
                 <form method="post" >
                     {% csrf_token %}
@@ -20,7 +21,7 @@
             {% endfor %}
         </div>
 
-        <div class="col-4">
+        <div class="col-sm-6 col-md-4">
             <ul class="list-unstyled">
             {% for prod in spots %}
 
@@ -29,7 +30,7 @@
             {% endfor %}
         </div>
 
-        <div class="col-4">
+        <div class="col-sm-6 col-md-4">
             <ul class="list-unstyled">
             {% for prod in mtps %}
                 {% render_product prod %}
@@ -37,12 +38,15 @@
         </div>
 
         </ul>
+
+        </div>
       </div>
+
       <script>
 
         function addToCart(code, title, imgSrc, price, orgArticul, brand) {
             const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;  // Get CSRF token
-            const productCodeSpan = document.querySelector(`.${code}`);
+            const productCodeSpan = document.querySelector(`.SP-${code}`);
             fetch('/add-to-cart/', {
                 method: 'POST',
                 headers: {
@@ -54,15 +58,15 @@
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    productCodeSpan.textContent = 'добавлен';
+                    productCodeSpan.innerHTML = '<i class="bi bi-cart-check-fill"></i>';
                 }
                 else {
-                    console.log(data, 'error')
+                    console.log(data, 'error' )
                     alert('There was an error adding the product to the cart.');
                 }
             })
             .catch(error => {
-                console.log('network error')
+                console.log('network error', error)
             });
         }
 

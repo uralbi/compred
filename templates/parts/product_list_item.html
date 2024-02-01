@@ -1,19 +1,22 @@
-<li class="product" data-title="{{ prod.title|lower }}">
-    <div class="d-flex flex-column flex-lg-row gap-3 align-items-start align-items-lg-center py-1 link-body-emphasis text-decoration-none border-top">
-        <img class="bd-placeholder-img" src="{{prod.image}}" width="auto" height="70"></img>
-        <div class="col-lg-8">
+<li class="product m-1" data-title="{{ prod.title|lower }}">
+    <div class="row align-items-lg-center py-1 link-body-emphasis text-decoration-none border-top"
+        style="min-width:">
+        <div class="col-3 p-0 ps-1 text-center">
+        <img class="bd-placeholder-img" src="{{prod.image}}" width="100%" height="auto" style="border-radius: 4px;"></img>
+        </div>
+        <div class="col-9 px-1 py-0 text-center">
             <p class="p-0 mb-0" style="font-size: 0.8em; font-weight: 500;">{{prod.title}}</p>
             <p class='m-0 p-0'><small class="text-body-secondary" style="font-size: 0.7em;">{{prod.articul}}</small></p>
             {% if prod.price != "Скоро" %}
                 <p class='m-0 p-0'><small class="text-body-primary" style="border: solid 1px #e2e2e2; background: #e6e6e6;
                     padding: 0 4px; border-radius: 4px;">
                     {{prod.price}} сом</small></p>
-                 <button class='btn btn-sm btn-outline-success mb-1 py-0 px-2' style="position: absolute; bottom: 0px; right: 2px; font-size: 0.7em"
+                 <button class='SP-{{prod.articul}} btn btn-sm btn-outline-success mb-1 py-0 px-2'
+                 style="position: absolute; bottom: 0px; right: 2px; font-size: 0.7em"
                         onclick="addToCart('{{ prod.articul }}', '{{ prod.title }}', '{{ prod.image }}', '{{ prod.price }}', '{{ prod.articul }}', 'Maytoni')">
-                    Добавить
+                        <i class="bi bi-cart"></i>
                 </button>
-                <span class="{{prod.articul}} badge bg-info m-0" style="font-size: 0.6em; font-weight: 400;
-                position: absolute; bottom: 24px; right: 2px;"></span>
+
             {% endif %}
         </div>
     </div>

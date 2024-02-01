@@ -18,7 +18,7 @@ import re
 
 
 def may_products(request):
-    cache_time = 86400 # 86400 (one day)
+    cache_time = 86400
     ctx = {
         'mtps': [],
         'track': [],
@@ -46,7 +46,7 @@ def may_products(request):
         parsed_tracks = cached_tracks
     else:
         parsed_tracks = get_may_tracks(request)
-        cache.set('maytoni_track', parsed_tracks, timeout=cache_time)
+        cache.set('maytoni_track', parsed_tracks, timeout=cache_time+3600)
     for new_track in parsed_tracks:
         request.session['track'].append(new_track)
 
@@ -54,7 +54,7 @@ def may_products(request):
         parsed_spots = cached_spots
     else:
         parsed_spots = get_may_spots(request)
-        cache.set('maytoni_spots', parsed_spots, timeout=cache_time)
+        cache.set('maytoni_spots', parsed_spots, timeout=cache_time+3600*2)
     for new_spot in parsed_spots:
         request.session['spots'].append(new_spot)
 
