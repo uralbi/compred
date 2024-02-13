@@ -17,6 +17,7 @@ import datetime
 import re
 
 
+
 def may_products(request):
     cache_time = 86400
     ctx = {
@@ -443,15 +444,15 @@ def get_may_spots(request):
     products = div_parser('https://maytoni.ru/search/?q=трековый светильник', 'catalog__item')
     mrg = Margin.objects.get(brand__name='Maytoni').margin
     for product in products:
-        image_src = product.find("picture", class_="catalog-card__img-img active").find('img')['src']
-        articul = product.find("div", class_="catalog-card").find('a')['href'].split('/')[-2]
-        title = product.find("div", class_="catalog-card__title").text.strip()
         try:
             price = product.find("span", class_="price").text.strip()
             price = int(''.join([i for i in price if i.isdigit()]))
             price = int(round(price*(1+mrg/100), -1))
         except:
             continue
+        image_src = product.find("picture", class_="catalog-card__img-img active").find('img')['src']
+        articul = product.find("div", class_="catalog-card").find('a')['href'].split('/')[-2]
+        title = product.find("div", class_="catalog-card__title").text.strip()
         new_product = {'image': f'{baseweb}{image_src}', 'articul': articul, 'title': title, 'price': price}
         parsed_data.append(new_product)
     return parsed_data
