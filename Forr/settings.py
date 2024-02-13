@@ -63,8 +63,8 @@ WSGI_APPLICATION = 'Forr.wsgi.application'
 CORS_ALLOW_ALL_ORIGINS = False
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # Adjust the port accordingly
-    "http://127.0.0.1:9000",  # Adjust the port accordingly
+    # "http://localhost:3000",
+    # "http://127.0.0.1:9000",
     'https://vio.kg',
 ]
 
@@ -106,7 +106,7 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
