@@ -2,14 +2,13 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
-# Load the .env file
 load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'default_secret_key')
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['3.68.93.144', 'http://3.68.93.144/', 'https://3.68.93.144/', 'localhost',]
+ALLOWED_HOSTS = ['18.153.92.135', '127.0.0.1', 'localhost', ]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -25,7 +24,6 @@ INSTALLED_APPS = [
     'account',
     'main',
     'ads',
-
 ]
 
 MIDDLEWARE = [
@@ -68,6 +66,8 @@ CORS_ALLOWED_ORIGINS = [
     'https://vio.kg',
 ]
 
+WHITENOISE_LOG = True
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -96,6 +96,22 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'whitenoise': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
 
 LANGUAGE_CODE = 'ru'  # Russian
 
