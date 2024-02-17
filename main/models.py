@@ -9,13 +9,14 @@ from django.core.files import File
 def image_process(image):
     width, height = 600, 600
     img = Image.open(image)
-    print('original image :', img.size)
+    if 600 in img.size:
+        return
     if img.width > width or img.height > height:
         output_size = (width, height)
         img.thumbnail(output_size)
         img_filename = Path(image.file.name).name
-        idx = img_filename.find('.')
-        img_format = img_filename[idx + 1:]
+        # idx = img_filename.find('.')
+        # img_format = img_filename[idx + 1:]
         cur_w, cur_h = img.size
         img_ratio = round(cur_w/cur_h, 2)
         if img_ratio < 0.8:
@@ -28,7 +29,6 @@ def image_process(image):
         img.save(buffer, format='png')
         file_object = File(buffer)
         image.save(img_filename, file_object)
-    print('after image image :', img.size)
 
 
 class Product(models.Model):
@@ -45,6 +45,7 @@ class Product(models.Model):
         if self.image:
             image_process(self.image)
         super().save(*args, **kwargs)
+
 
 class Brand(models.Model):
     name = models.CharField(max_length=150)

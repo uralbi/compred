@@ -17,7 +17,6 @@ import datetime
 import re
 
 
-
 def may_products(request):
     cache_time = 86400
     ctx = {
@@ -164,7 +163,6 @@ def clear_session(request):
 
     return redirect('home')
 
-
 @require_http_methods(["GET"])
 def update_quantity(request):
     try:
@@ -191,7 +189,6 @@ def update_quantity(request):
         # Handle other exceptions
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
-
 @require_http_methods(["GET"])
 def delete_product(request):
     code = request.GET.get('code')
@@ -203,7 +200,6 @@ def delete_product(request):
         return JsonResponse({'status': 'success', 'message': 'Product deleted successfully'})
 
     return JsonResponse({'status': 'error', 'message': 'No products in session'}, status=404)
-
 
 @require_http_methods(["POST"])
 def add_to_cart(request):
@@ -231,7 +227,6 @@ def add_to_cart(request):
     request.session['products'].append(new_product)
     request.session.modified = True
     return JsonResponse({'status': 'success'})
-
 
 def download_excel(request):
     products = request.session.get('products', [])
@@ -289,7 +284,6 @@ def download_excel(request):
     workbook.save(response)
     return response
 
-
 def get_data(articul):
     baseweb = 'https://maytoni.ru'
     web_link = f'https://maytoni.ru/search/?q={articul}'
@@ -328,7 +322,6 @@ def get_data(articul):
     brand = 'Maytoni'
     return title, img_src, d_price, org_articul, pf_link, brand
 
-
 def get_fenix(articul):
     web_link = f'https://favourite-light.com/catalog/?s={articul}'
     source = requests.get(web_link).text
@@ -359,7 +352,6 @@ def get_fenix(articul):
     assert articul == org_articul
     brand = 'Fenix'
     return title.title(), img_src, price, org_articul, web2, brand
-
 
 def get_vamsvet(articul):
     # art = 'https://www.vamsvet.ru/search/?q=FR6005CL-L48G'
@@ -398,7 +390,6 @@ def get_vamsvet(articul):
 def logout_view(request):
     logout(request)
     return redirect('home')
-
 
 def get_may_products(request):
     baseweb = 'https://maytoni.ru'
