@@ -87,12 +87,11 @@ def home(request):
     }
     if 'products' not in request.session:
         request.session['products'] = []
-
+    lms_products = Product.objects.select_related('brand').all()
     if 'code' in request.GET:
         code = request.GET['code'].strip()
         codes = code.split(';')
         margin = Margin.objects.all()
-
         for code in codes:
             if len(code) > 3:
                 existing_product = next((item for item in request.session['products'] if item['code'] == code), None)
@@ -100,7 +99,7 @@ def home(request):
                     messages.success(request, 'Артикул уже добавлен!')
                     return redirect('home')
                 try:
-                    product = Product.objects.get(code__iexact=code.strip())
+                    product = lms_products.get(code__iexact=code.strip())
                     title = product.info + ' / ' + product.code
                     img_src = f'/products/{product.image}'
                     new_product = {'code': code, 'title': title, 'img_src': img_src,
@@ -146,8 +145,6 @@ def home(request):
         total_sum += int(product['price']) * int(product['quantity'])
     context['total_sum'] = total_sum
     context['products'] = request.session['products']
-
-    lms_products = Product.objects.all()
     context['lms_products'] = lms_products
     return render(request, 'main.html', context)
 
