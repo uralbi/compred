@@ -15,9 +15,8 @@
                     {% csrf_token %}
                 </form>
 
-
+                {% cache 3000 sidebar %}
                 {% for prod in products %}
-
                 <li class="product-item text-center" data-name="{{ prod.product }}" style="float: left; width:300px;">
                     <div class="row align-items-lg-center py-1 link-body-emphasis text-decoration-none border-top"
                         style="width:290px; height: 90px;">
@@ -41,29 +40,8 @@
                         </div>
                     </div>
                 </li>
-
-                {% comment %} <li class="product-item" data-name="{{ prod.product }}">
-                    <div class="card product-price-card">
-                        <div class="row g-0">
-                          <div class="col-4">
-                            <img class="img-fluid rounded-start" src="{{prod.product.image.url}}" alt="Product Image">
-                            <small class="price-badge"> {{ prod.product.price}} сом </small>
-                          </div>
-                          <div class="col-8">
-                            <div class="card-body m-0 p-0">
-                              <h5 class="card-title">{{prod.product}}  </h5>
-                              <p class="card-text">{{prod.product.info}}</p>
-                              <button class='btn btn-sm btn-outline-success mb-1 py-0 px-2'
-                            onclick="addToCart('{{ prod.product.code }}', '{{ prod.product.info }}', '{{ prod.product.image.url }}', '{{ prod.product.price }}', '{{ prod.product.code }}', '{{prod.product.brand}}')">
-                            Добавить
-                            </button>
-                            <span class="{{prod.product.code}} badge bg-info m-0"></span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                </li> {% endcomment %}
                 {% endfor%}
+                {% endcache %}
             </ul>
         </div>
     </div>
