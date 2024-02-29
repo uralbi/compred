@@ -312,10 +312,8 @@
         document.querySelector('.date').textContent = currentDate;
     }
 
-    // Call the function to set the date when the script loads
     setCurrentDate();
 
-// Function to filter products based on search query
 function filterProducts() {
     var searchValue = document.getElementById('filterInput').value.toLowerCase();
     var products = document.querySelectorAll('.product-card');
@@ -329,7 +327,6 @@ function filterProducts() {
         }
     });
 
-    // Store the search query in local storage
     localStorage.setItem('searchQuery', searchValue);
 }
 
@@ -338,6 +335,7 @@ function loadSearchQuery() {
     var searchQuery = localStorage.getItem('searchQuery');
     if (searchQuery) {
         document.getElementById('filterInput').value = searchQuery;
+        // document.getElementById('filterInput').innerText = searchQuery;
         filterProducts();
     }
 }
@@ -345,7 +343,6 @@ function loadSearchQuery() {
 // Event listener for keyup event
 document.getElementById('filterInput').addEventListener('keyup', filterProducts);
 
-// Load search query when the page loads
 window.addEventListener('load', loadSearchQuery);
 
     function formatNumberWithSpaces(number) {
