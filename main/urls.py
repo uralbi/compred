@@ -7,7 +7,7 @@ from django.conf import settings
 urlpatterns = [
     path('', home, name='home'),
     path('logout/', logout_view, name='logout'),
-    path('lms-products/', showroom, name='showroom'),
+    # path('lms-products/', showroom, name='showroom'),
     # path('mtps/', may_products, name='mtps'),
     # path('main/', homepage, name='homepage'),
     path('clear-session/', clear_session, name='clear_session'),
