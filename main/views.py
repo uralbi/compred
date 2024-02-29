@@ -69,17 +69,17 @@ def showroom(request):
     ctx = {
         'products': []
     }
-    ctx['products'] = Promotions.objects.all()
+    ctx['products'] = Product.objects.all()
     return render(request, 'products.html', ctx)
 
-def homepage(request):
-    context = {
-        'products': []
-    }
-    proms = Promotions.objects.all()
-    products = [prom.product for prom in proms if prom.product]
-    context['products'] = products
-    return render(request, 'index.html', context)
+# def homepage(request):
+#     context = {
+#         'products': []
+#     }
+#     proms = Promotions.objects.all()
+#     products = [prom.product for prom in proms if prom.product]
+#     context['products'] = products
+#     return render(request, 'index.html', context)
 
 def home(request):
     context = {
