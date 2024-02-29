@@ -24,7 +24,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'account',
     'main',
-    'ads',
 ]
 
 MIDDLEWARE = [
@@ -79,8 +78,6 @@ DATABASES = {
         'NAME': BASE_DIR / 'dictionary.sqlite3',
     }
 }
-
-DATABASE_ROUTERS = ['routers.DictionaryRouter']
 
 AUTH_PASSWORD_VALIDATORS = [
     { 'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator', },
