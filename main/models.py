@@ -7,7 +7,7 @@ from django.core.files import File
 
 
 def image_process(image):
-    width, height = 900, 900
+    width, height = 600, 600
     img = Image.open(image)
     output_size = (width, height)
     img.thumbnail(output_size)
