@@ -348,6 +348,7 @@
     }
 
     function deleteProduct(code) {
+
         fetch(`/delete-product?code=${code}`, {
             method: 'GET',
             headers: {
@@ -362,10 +363,13 @@
         })
         .then(data => {
             location.reload();  // Reload the page to reflect the changes
+            // window.location.reload(true)
+            console.log('product deleted from the session')
         })
         .catch(error => {
             console.error('There has been a problem with your fetch operation:', error);
         });
+
     }
 
     function saveAsPDF() {
@@ -416,38 +420,38 @@
 
     setCurrentDate();
 
-function filterProducts() {
-    var searchValue = document.getElementById('filterInput').value.toLowerCase();
-    var products = document.querySelectorAll('.product-card');
+    function filterProducts() {
+        var searchValue = document.getElementById('filterInput').value.toLowerCase();
+        var products = document.querySelectorAll('.product-card');
 
-    products.forEach(function(product) {
-        var productCode = product.getAttribute('data-code').toLowerCase();
-        if (productCode.indexOf(searchValue) > -1) {
-            product.style.display = '';
-        } else {
-            product.style.display = 'none';
-        }
-    });
+        products.forEach(function(product) {
+            var productCode = product.getAttribute('data-code').toLowerCase();
+            if (productCode.indexOf(searchValue) > -1) {
+                product.style.display = '';
+            } else {
+                product.style.display = 'none';
+            }
+        });
 
-    localStorage.setItem('searchQuery', searchValue);
-}
-
-// Function to load the search query from local storage
-function loadSearchQuery() {
-    var searchQuery = localStorage.getItem('searchQuery');
-    if (searchQuery) {
-        document.getElementById('filterInput').value = searchQuery;
-        // document.getElementById('filterInput').innerText = searchQuery;
-        filterProducts();
+        localStorage.setItem('searchQuery', searchValue);
     }
-}
 
-// Event listener for keyup event
-document.getElementById('filterInput').addEventListener('keyup', filterProducts);
+    // Function to load the search query from local storage
+    function loadSearchQuery() {
+        var searchQuery = localStorage.getItem('searchQuery');
+        if (searchQuery) {
+            document.getElementById('filterInput').value = searchQuery;
+            // document.getElementById('filterInput').innerText = searchQuery;
+            filterProducts();
+        }
+    }
 
-window.addEventListener('load', loadSearchQuery);
-window.addEventListener('load', updateTotalSum);
-window.addEventListener('load', updateDiscountedTotal);
+    // Event listener for keyup event
+    document.getElementById('filterInput').addEventListener('keyup', filterProducts);
+
+    window.addEventListener('load', loadSearchQuery);
+    window.addEventListener('load', updateTotalSum);
+    window.addEventListener('load', updateDiscountedTotal);
 
     function updateDiscountedTotal() {
         var discountPercent = parseFloat(document.getElementById('discountInput').value);
@@ -497,7 +501,10 @@ window.addEventListener('load', updateDiscountedTotal);
         .then(data => {
             if (data.status === 'success') {
                 // Reload the page
-                console.log(data)
+                console.log(data.status)
+                const savedQuantity = localStorage.setItem(`quantity_${code}`, 1);
+                const savedTotal = localStorage.setItem(`total_${code}`, price);
+                const savedPrice = localStorage.setItem(`price_${code}`, price);
                 window.location.reload();
             } else {
                 // Handle error
@@ -506,7 +513,7 @@ window.addEventListener('load', updateDiscountedTotal);
         })
         .catch(error => {
             // Handle network error
-            alert('Network error occurred.');
+            alert(error);
         });
     }
 

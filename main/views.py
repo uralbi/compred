@@ -175,9 +175,6 @@ def update_quantity(request):
                 existing_product['quantity'] = new_quantity
                 existing_product['price'] = price
                 request.session.modified = True
-
-                print(existing_product)
-
                 return JsonResponse({'status': 'success', 'message': 'Quantity updated successfully'})
             else:
                 return JsonResponse({'status': 'error', 'message': 'Product not found'}, status=404)
