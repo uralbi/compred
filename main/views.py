@@ -165,15 +165,19 @@ def update_quantity(request):
     try:
         code = request.GET.get('code')
         change = float(request.GET.get('change', 0))
+        price = float(request.GET.get('price', 0))
 
         if 'products' in request.session:
-            # Find the product with the matching code
             existing_product = next((item for item in request.session['products'] if item['code'] == code), None)
+
             if existing_product:
-                # new_quantity = max(existing_product['quantity'] + change, 0)
                 new_quantity = max(change, 0)
                 existing_product['quantity'] = new_quantity
+                existing_product['price'] = price
                 request.session.modified = True
+
+                print(existing_product)
+
                 return JsonResponse({'status': 'success', 'message': 'Quantity updated successfully'})
             else:
                 return JsonResponse({'status': 'error', 'message': 'Product not found'}, status=404)

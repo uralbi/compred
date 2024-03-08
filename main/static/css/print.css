@@ -47,6 +47,9 @@
 .product-card p {
     font-size: 0.9em;
 }
+.product-price {
+    border: solid 1px white;
+}
 .header-card input {
     border: none;
     border-bottom: 1px solid rgb(190, 190, 190);
