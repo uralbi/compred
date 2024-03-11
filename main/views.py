@@ -12,7 +12,6 @@ import requests
 from PIL import Image as PILImage
 from io import BytesIO
 from openpyxl import Workbook
-from openpyxl.drawing.image import Image
 from openpyxl.drawing.image import Image as OpenpyxlImage
 from django.http import HttpResponse
 import datetime
@@ -273,14 +272,19 @@ def download_excel(request):
         if product.get('img_src'):
             image_response = requests.get(web_src)
             if image_response.status_code == 200:
-                image = Image(BytesIO(image_response.content))
-                desired_width = 140  # Set your desired width
-                aspect_ratio = image.width / image.height
-                image.width = desired_width
-                image.height = desired_width / aspect_ratio
-                sheet.add_image(image, f'B{row_num}')
-                points_height = image.height * (75 / 96)  # Convert pixels to points
+                png_image = fetch_image_and_convert_to_png(web_src)
+                desired_width = 140                                 # Set your desired width
+                aspect_ratio = png_image.width / png_image.height
+                new_height = int(desired_width / aspect_ratio)
+                points_height = new_height * (75 / 96)              # Convert pixels to points
+                png_image = resize_image_to_fit_row_height(png_image, new_height-4 )
+                image_buffer = BytesIO()
+                png_image.save(image_buffer, format='PNG')
+                image_buffer.seek(0)
+                openpyxl_image = OpenpyxlImage(image_buffer)
+                sheet.add_image(openpyxl_image, f'B{row_num}')
                 sheet.row_dimensions[row_num].height = points_height
+
     workbook.save(response)
     return response
 
@@ -480,7 +484,6 @@ def add_image_to_sheet(sheet, pil_image, position, row_num):
     points_height = pil_image.height * (75 / 96)  # Convert pixels to points
     sheet.row_dimensions[row_num].height = points_height
 
-
 def process_product_image(sheet, product, row_num):
     """Process and add product image to sheet."""
     img_src = product.get('img_src')
@@ -491,3 +494,21 @@ def process_product_image(sheet, product, row_num):
             add_image_to_sheet(sheet, resized_image, f'B{row_num}', row_num)
         except Exception as e:
             print(f"Error processing image for product {product.get('code', 'Unknown')}: {e}")
+
+def fetch_image_and_convert_to_png(url):
+    response = requests.get(url)
+    if response.status_code == 200:
+        image = PILImage.open(BytesIO(response.content))
+        png_image = image.convert("RGBA")
+        return png_image
+    else:
+        response.raise_for_status()
+
+
+def resize_image_to_fit_row_height(img, desired_height_pixels):
+    original_width, original_height = img.size
+    aspect_ratio = original_width / original_height
+    new_height = desired_height_pixels
+    new_width = int(new_height * aspect_ratio)
+    resized_img = img.resize((new_width, new_height), PILImage.Resampling.LANCZOS)
+    return resized_img

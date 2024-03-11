@@ -26,9 +26,9 @@ def image_process(image):
         img = img.crop((left, 0, right, cur_h))
 
     buffer = BytesIO()
-    img.save(buffer, format='PNG', optimize=True)
+    img.save(buffer, format='WEBP', optimize=True)
     buffer.seek(0)
-    new_img_filename = f"{img_filename}.png"
+    new_img_filename = f"{img_filename}.webp"
     image.save(new_img_filename, File(buffer), save=False)
 
 
