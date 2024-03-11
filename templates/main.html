@@ -119,14 +119,15 @@
                     <tbody>
                         {% if products %}
                             {% for product in products %}
-                            <tr class="product-row" data-code="{{ product.code }}">
+                            {% with product.code|no_spaces as prd_code %}
+                            <tr class="product-row" data-code="{{ prd_code }}">
                                 <td class='product_image p-1 text-center'>
                                     <img src="{{ product.img_src}}" alt="{{ product.title }}" class="img-fluid">
                                 </td>
                                 <td>
                                     {{ product.title|safe }}
                                     <br>
-                                    <button class="btn-delete m-1" onclick="deleteProduct('{{ product.code }}')">
+                                    <button class="btn-delete m-1" onclick="deleteProduct('{{product.code}}')">
                                         <i class="bi bi-x"></i>
                                     </button>
 
@@ -136,7 +137,7 @@
                                 </td>
                                 <td class='text-center'>
 
-                                    <input class='border-0 text-center' type="text" id="quantityChange_{{ product.code }}" value="{{product.quantity}}" min="1" style="width: 50px;">
+                                    <input class='border-0 text-center' type="text" id="quantityChange_{{ prd_code }}" value="{{product.quantity}}" min="1" style="width: 50px;">
                                     {% comment %} <button class="quantity-update" onclick="updateQuantity('{{ product.code }}')">
                                         <i class="bi bi-chevron-compact-right"></i>
                                     </button> {% endcomment %}
@@ -144,11 +145,11 @@
                                 </td>
                                 <td class='text-end'>
                                     {% comment %} <span class='product-price'>{{ product.price|intcomma }}</span> {% endcomment %}
-                                    <input class="product-price text-center border-0" id="price_{{product.code}}"  type='text' value="{{ product.price }}">
+                                    <input class="product-price text-center border-0" id="price_{{prd_code}}"  type='text' value="{{ product.price }}">
                                 </td>
                                 <td class='text-end' >
                                     {% comment %} {{ product.price|multiply:product.quantity|intcomma }} {% endcomment %}
-                                    <span class="subtotal_{{product.code}}"> {{ product.price|multiply:product.quantity|intcomma }} </span>
+                                    <span class="subtotal_{{ prd_code }}"> {{ product.price|multiply:product.quantity|intcomma }} </span>
                                 </td>
                             </tr>
 
@@ -170,7 +171,7 @@
                                     updateDiscountedTotal();
                                   }
 
-                                  productCode ='{{product.code}}'
+
                                   function loadSavedValues(productCode) {
                                     const quantityInput = document.getElementById(`quantityChange_${productCode}`);
                                     const totalSpan = document.querySelector(`.subtotal_${productCode}`);
@@ -187,18 +188,19 @@
                                   }
 
                                   document.addEventListener('DOMContentLoaded', () => {
-                                    const productCodes = ['{{product.code}}'];
+                                    const productCodes = ['{{prd_code}}'];
                                     productCodes.forEach(code => loadSavedValues(code));
-
                                   });
 
                             </script>
+                            {% endwith%}
                             {% endfor %}
 
                             <script>
                                 document.addEventListener('DOMContentLoaded', function() {
 
                                     {% for product in products %}
+
                                         (function(productCode) {
                                             var inputElement = document.getElementById(`quantityChange_${productCode}`);
                                             var priceElement = document.getElementById(`price_${productCode}`);
@@ -216,8 +218,8 @@
                                             }
 
                                             var handleInput = debounce(function() {
-                                                updateQuantity(productCode);
-                                                updateQuantity2(productCode);
+                                                updateQuantity(productCode); // localstorage
+                                                updateQuantity2(productCode); // session storage
                                                 updateTotalSum();
                                                 updateDiscountedTotal();
                                             }, 800); // Wait for 500 ms after the user stops typing
@@ -226,14 +228,15 @@
                                                 inputElement.addEventListener('input', handleInput);
                                                 priceElement.addEventListener('input', handleInput);
                                             }
-                                        })('{{ product.code }}');
+                                        })('{{ product.code|no_spaces }}');
+
                                     {% endfor %}
                                 });
 
 
                                 function updateQuantity2(code) {
-                                    let change = parseInt(document.getElementById(`quantityChange_${code}`).value, 10);
-                                    let price = parseFloat(document.getElementById(`price_${code}`).value.replace(/\s/g, ''));
+                                    let change = parseInt(document.getElementById(`quantityChange_${code}`).value.replace(' ', '-'), 10);
+                                    let price = parseFloat(document.getElementById(`price_${code}`).value.replace(/\s/g, '').replace(' ', ''));
 
                                     fetch(`/update-quantity?code=${code}&change=${change}&price=${price}`, {
                                         method: 'GET',

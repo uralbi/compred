@@ -9,9 +9,11 @@ from django.contrib import messages
 from django.utils.safestring import mark_safe
 from .models import Product, Promotions, Margin
 import requests
+from PIL import Image as PILImage
 from io import BytesIO
 from openpyxl import Workbook
 from openpyxl.drawing.image import Image
+from openpyxl.drawing.image import Image as OpenpyxlImage
 from django.http import HttpResponse
 import datetime
 import re
@@ -201,7 +203,8 @@ def delete_product(request):
 
 @require_http_methods(["POST"])
 def add_to_cart(request):
-    code = request.POST.get('code')
+    code = request.POST.get('code').replace(' ', '-')
+    print('add to cart:', code)
     title = request.POST.get('title')
     img_src = f"{request.POST.get('img_src')}"
     price = request.POST.get('price')
@@ -278,7 +281,6 @@ def download_excel(request):
                 sheet.add_image(image, f'B{row_num}')
                 points_height = image.height * (75 / 96)  # Convert pixels to points
                 sheet.row_dimensions[row_num].height = points_height
-
     workbook.save(response)
     return response
 
@@ -451,3 +453,41 @@ def div_parser(webl, class_name):
     soup = BeautifulSoup(source, 'lxml')
     products = soup.find_all("div", class_=class_name)
     return products
+
+def fetch_image(url):
+    """Fetch an image from a URL and return it as a PIL image."""
+    response = requests.get(url)
+    if response.status_code == 200:
+        return PILImage.open(BytesIO(response.content))
+    else:
+        response.raise_for_status()
+
+def resize_image(pil_image, desired_width):
+    """Resize PIL image to a desired width while maintaining aspect ratio."""
+    aspect_ratio = pil_image.width / pil_image.height
+    new_height = int(desired_width / aspect_ratio)
+    return pil_image.resize((desired_width, new_height), PILImage.ANTIALIAS)
+
+def add_image_to_sheet(sheet, pil_image, position, row_num):
+    """Add a PIL image to an Excel sheet at the specified position."""
+    with BytesIO() as image_io:
+        pil_image.save(image_io, format='PNG')
+        image_io.seek(0)
+        openpyxl_image = OpenpyxlImage(image_io)
+        sheet.add_image(openpyxl_image, position)
+
+    # Set row height based on image height, converting pixels to points
+    points_height = pil_image.height * (75 / 96)  # Convert pixels to points
+    sheet.row_dimensions[row_num].height = points_height
+
+
+def process_product_image(sheet, product, row_num):
+    """Process and add product image to sheet."""
+    img_src = product.get('img_src')
+    if img_src:
+        try:
+            pil_image = fetch_image(img_src)
+            resized_image = resize_image(pil_image, desired_width=140)  # Set your desired width here
+            add_image_to_sheet(sheet, resized_image, f'B{row_num}', row_num)
+        except Exception as e:
+            print(f"Error processing image for product {product.get('code', 'Unknown')}: {e}")

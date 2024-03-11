@@ -15,3 +15,9 @@ def multiply(value, arg):
 def urlencode(value):
     val = value.replace('\r\n', ' ')
     return  val
+
+
+@register.filter(name='no_spaces')
+def no_spaces(value):
+    val = value.replace(' ', '-')
+    return  val
