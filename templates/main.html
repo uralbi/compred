@@ -110,7 +110,7 @@
                     <thead>
                         <tr class='text-center'>
                             <th scope="col">Фото</th>
-                            <th scope="col">Наименование</th>
+                            <th scope="col">Наименование <button id="clearLocalStorageButton" class='btn btn-sm btn-outline-secondary py-0 px-2 border-0'>x</button> </th>
                             <th scope="col">Количество</th>
                             <th scope="col">Цена(сом)</th>
                             <th scope="col">Общ.цена</th>
@@ -120,38 +120,37 @@
                         {% if products %}
                             {% for product in products %}
                             {% with product.code|no_spaces as prd_code %}
-                            <tr class="product-row" data-code="{{ prd_code }}">
-                                <td class='product_image p-1 text-center'>
-                                    <img src="{{ product.img_src}}" alt="{{ product.title }}" class="img-fluid">
-                                </td>
-                                <td>
-                                    {{ product.title|safe }}
-                                    <br>
-                                    <button class="btn-delete m-1" onclick="deleteProduct('{{product.code}}')">
-                                        <i class="bi bi-x"></i>
-                                    </button>
+                                <tr class="product-row" data-code="{{ prd_code }}">
+                                    <td class='product_image p-1 text-center'>
+                                        <img src="{{ product.img_src}}" alt="image" class="img-fluid">
+                                    </td>
+                                    <td class="p-1">
+                                        <p id="info_{{ prd_code }}" class='m-0' contenteditable>{{ product.title|safe }}</p>
+                                        <button class="btn-delete m-1 border-0" onclick="deleteProduct('{{product.code}}')">
+                                            <i class="bi bi-x"></i>
+                                        </button>
 
-                                    {% if product.web %}
-                                    <a href = '{{product.web}}' target='_blank'><i class="bi bi-chevron-compact-right"></i></a>
-                                    {% endif %}
-                                </td>
-                                <td class='text-center'>
+                                        {% if product.web %}
+                                        <a href = '{{product.web}}' target='_blank'><i class="bi bi-chevron-compact-right"></i></a>
+                                        {% endif %}
+                                    </td>
+                                    <td class='text-center'>
 
-                                    <input class='border-0 text-center' type="text" id="quantityChange_{{ prd_code }}" value="{{product.quantity}}" min="1" style="width: 50px;">
-                                    {% comment %} <button class="quantity-update" onclick="updateQuantity('{{ product.code }}')">
-                                        <i class="bi bi-chevron-compact-right"></i>
-                                    </button> {% endcomment %}
+                                        <input class='border-0 text-center' type="text" id="quantityChange_{{ prd_code }}" value="{{product.quantity}}" min="1" style="width: 50px;">
+                                        {% comment %} <button class="quantity-update" onclick="updateQuantity('{{ product.code }}')">
+                                            <i class="bi bi-chevron-compact-right"></i>
+                                        </button> {% endcomment %}
 
-                                </td>
-                                <td class='text-end'>
-                                    {% comment %} <span class='product-price'>{{ product.price|intcomma }}</span> {% endcomment %}
-                                    <input class="product-price text-center border-0" id="price_{{prd_code}}"  type='text' value="{{ product.price }}">
-                                </td>
-                                <td class='text-end' >
-                                    {% comment %} {{ product.price|multiply:product.quantity|intcomma }} {% endcomment %}
-                                    <span class="subtotal_{{ prd_code }}"> {{ product.price|multiply:product.quantity|intcomma }} </span>
-                                </td>
-                            </tr>
+                                    </td>
+                                    <td class='text-end'>
+                                        {% comment %} <span class='product-price'>{{ product.price|intcomma }}</span> {% endcomment %}
+                                        <input class="product-price text-center border-0" id="price_{{prd_code}}"  type='text' value="{{ product.price }}">
+                                    </td>
+                                    <td class='text-end' >
+                                        {% comment %} {{ product.price|multiply:product.quantity|intcomma }} {% endcomment %}
+                                        <span class="subtotal_{{ prd_code }}"> {{ product.price|multiply:product.quantity|intcomma }} </span>
+                                    </td>
+                                </tr>
 
                             <script>
 
@@ -171,7 +170,6 @@
                                     updateDiscountedTotal();
                                   }
 
-
                                   function loadSavedValues(productCode) {
                                     const quantityInput = document.getElementById(`quantityChange_${productCode}`);
                                     const totalSpan = document.querySelector(`.subtotal_${productCode}`);
@@ -179,6 +177,20 @@
                                     const savedQuantity = localStorage.getItem(`quantity_${productCode}`);
                                     const savedTotal = localStorage.getItem(`total_${productCode}`);
                                     const savedPrice = localStorage.getItem(`price_${productCode}`);
+
+                                    const contentId = `info_${productCode}`;
+                                    const contentElement = document.getElementById(contentId);
+                                    const savedContent = localStorage.getItem(contentId);
+                                        if (savedContent && contentElement) {
+                                            contentElement.innerText = savedContent;
+                                        }
+                                        if (contentElement) {
+                                            contentElement.addEventListener('blur', () => {
+                                                const newContent = contentElement.innerText;
+                                                localStorage.setItem(contentId, newContent);
+                                            });
+                                        }
+
                                     if (savedQuantity !== null) {
                                       quantityInput.value = savedQuantity; }
                                     if (savedPrice !== null) {
@@ -228,6 +240,7 @@
                                                 inputElement.addEventListener('input', handleInput);
                                                 priceElement.addEventListener('input', handleInput);
                                             }
+
                                         })('{{ product.code|no_spaces }}');
 
                                     {% endfor %}
@@ -492,6 +505,10 @@
 
     function addToCart(code, title, imgSrc, price, orgArticul, brand) {
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;  // Get CSRF token
+
+        const savedInfo = localStorage.getItem(`info_${code}`);
+        if (savedInfo){ title = savedInfo }
+
         fetch('/add-to-cart/', {
             method: 'POST',
             headers: {
@@ -565,6 +582,15 @@ function loadDiscountInputData() {
 window.addEventListener('load', loadInputData);
 window.addEventListener('load', loadDiscountInputData);
 document.getElementById('discountInput').addEventListener('input', saveDiscountInputData);
+
+document.addEventListener('DOMContentLoaded', (event) => {
+    const clearButton = document.getElementById('clearLocalStorageButton');
+
+    clearButton.addEventListener('click', function() {
+      localStorage.clear();
+      location.reload()
+    });
+  });
 
     </script>
 

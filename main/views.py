@@ -103,7 +103,7 @@ def home(request):
                     product = lms_products.get(code__iexact=code.strip())
                     title = product.info + ' / ' + product.code
                     img_src = f'/products/{product.image}'
-                    new_product = {'code': code, 'title': title, 'img_src': img_src,
+                    new_product = {'code': code, 'title': title.replace('\n', ' '), 'img_src': img_src,
                                 'price': product.price, 'quantity': 1, 'org_articul': product.code, 'brand': product.brand}
                     request.session['products'].append(new_product)
                     request.session.modified = True
