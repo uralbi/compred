@@ -3,6 +3,10 @@ from django.utils.deprecation import MiddlewareMixin
 from django.core.exceptions import PermissionDenied
 from django.conf import settings
 
+def writer_cities(word):
+    with open('cities.txt', 'a') as file:
+        file.write(word + '\n')
+        
 def writer(word):
     with open('allowedips.txt', 'a') as file:
         file.write(word + '\n')
@@ -35,7 +39,9 @@ class FilterRequestsMiddleware(MiddlewareMixin):
             city = self.get_city_from_ip(ip_address)
             allowed_cities = ['bishkek', 'osh', 'kara-kol', 'cholpon-ata', 'kemin']
             
-            if city.lower() in allowed_cities:
+            writer_cities(city)
+             
+            if city.strip().lower() in allowed_cities:
                 writer(ip_address)
                 return None
             else:
