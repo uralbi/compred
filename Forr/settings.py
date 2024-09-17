@@ -67,6 +67,8 @@ CORS_ALLOWED_ORIGINS = [
     'https://vio.kg',
 ]
 
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 WHITENOISE_LOG = True
 
 DATABASES = {
