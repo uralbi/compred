@@ -39,7 +39,7 @@ class FilterRequestsMiddleware(MiddlewareMixin):
             city = self.get_city_from_ip(ip_address)
             allowed_cities = ['bishkek', 'osh', 'kara-kol', 'cholpon-ata', 'kemin']
             
-            writer_cities(city)
+            writer_cities(f'{city} - {ip_address}')
              
             if city.strip().lower() in allowed_cities:
                 writer(ip_address)
