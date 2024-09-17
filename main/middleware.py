@@ -32,6 +32,9 @@ class FilterRequestsMiddleware(MiddlewareMixin):
             else:
                 ip_address = request.META.get('REMOTE_ADDR')
             
+            if not ip_address:
+                ip_address = request.META.get('REMOTE_ADDR')
+            
             for archive in reader():
                 if ip_address in archive:
                     return None
