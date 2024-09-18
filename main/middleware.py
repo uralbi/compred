@@ -61,7 +61,6 @@ class FilterRequestsMiddleware(MiddlewareMixin):
         url = f'https://ip.city/?ip={ip_address}'
         response = requests.get(url)
         dec_response = response.content.decode('utf-8')
-        
         idx = dec_response.find('Your city is detected as')
         res1 = dec_response[idx+25:]
         idx2 = res1.find('based on your IP address')
@@ -69,4 +68,6 @@ class FilterRequestsMiddleware(MiddlewareMixin):
         if city:
             return city
         else:
-            return 'undef'
+            idx3 = res1.find('.')
+            count = res1[:idx3].split(' ')[-1]
+            return count
